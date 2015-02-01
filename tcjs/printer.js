@@ -6,6 +6,9 @@ function pr_str(x) {
     if (x === null) {
         return 'nil';
     }
+    if (typeof x === 'string') {
+        return '"' + x + '"';
+    }
     if (Array.isArray(x)) {
         var isVector = x.vector;
 

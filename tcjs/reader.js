@@ -49,6 +49,14 @@ function read_symbol(r) {
     return {symbol: r.next()};
 }
 
+function read_string(r) {
+    var s = r.next();
+    if (s[0] !== '"' || s[s.length - 1] !== '"') {
+        throw new Error("problem reading string: " + s);
+    }
+    return s.substr(1, s.length - 2);
+}
+
 function read_keyword(r) {
     var kw = r.next().substr(1);
 
@@ -137,8 +145,9 @@ function read_spliceunquote(r) {
 }
 
 function read_form(r) {
-    if (r.peek()[0] === ':') {
-        return read_keyword(r);
+    switch (r.peek()[0]) {
+    case ':': return read_keyword(r);
+    case '"': return read_string(r);
     }
 
     switch (r.peek()) {
