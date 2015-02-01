@@ -3,6 +3,9 @@ function pr_quoted(symbol, form) {
 }
 
 function pr_str(x) {
+    if (x === null) {
+        return 'nil';
+    }
     if (Array.isArray(x)) {
         var isVector = x.vector;
 

@@ -1,3 +1,6 @@
+function BlankException(msg) {
+}
+
 function Reader(tokens) {
     var current = 0;
 
@@ -5,18 +8,18 @@ function Reader(tokens) {
         throw new Error("expected array-like");
     }
 
-    function commaTrim(s) {
-        return s && s.replace(/,*/g, '').trim();
+    if (tokens[0] === null) {
+        throw new BlankException('First token is empty/comment');
     }
 
     var api = {};
 
     api.next = function() {
-        return commaTrim(tokens[current++]);
+        return tokens[current++];
     };
 
     api.peek = function() {
-        return commaTrim(tokens[current]);
+        return tokens[current];
     };
 
     api.is_finished = function() {
@@ -29,8 +32,17 @@ function Reader(tokens) {
 };
 
 function tokenizer(input) {
+    function trimmer(s) {
+        return s && s.replace(/,*/g, '').trim(); // TODO: goes into strings, not good
+    }
+
+    function comments(s) {
+        if (s[0] === ';') return null;
+        else return s;
+    }
+
     var re = /[\s,]*(~@|[\[\]{}()'`~^@]|"(?:\\.|[^\\"])*"|;.*|[^\s\[\]{}('"`,;)]*)/g;
-    return input.trim().match(re).slice(0, -1);
+    return input.trim().match(re).slice(0, -1).map(trimmer).map(comments);
 }
 
 function read_symbol(r) {
@@ -136,6 +148,9 @@ function read_form(r) {
     case '`':    return read_quasiquote(r);
     case '~':    return read_unquote(r);
     case '~@':   return read_spliceunquote(r);
+    case 'true': return true;
+    case 'false':return false;
+    case 'nil':  return null;
     default:     return read_atom(r);
     }
 }
@@ -153,3 +168,4 @@ function read_str(input) {
 }
 
 exports.read_str = read_str;
+exports.BlankException = BlankException;

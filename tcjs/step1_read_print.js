@@ -1,4 +1,5 @@
-var read_str = require('./reader.js').read_str;
+var reader = require('./reader.js'),
+    read_str = reader.read_str;
 
 function READ(a) {
     return read_str(a);
@@ -33,7 +34,10 @@ function rep(a) {
 
 var readline = require('./node_readline.js');
 
-//rep = DEBUG_rep;
+if (process.argv[2] === 'debug') {
+    console.log("debugging REPL");
+    rep = DEBUG_rep;
+}
 
 // repl loop
 if (typeof require !== 'undefined' && require.main === module) {
@@ -44,7 +48,7 @@ if (typeof require !== 'undefined' && require.main === module) {
         try {
             if (line) { console.log(rep(line)); }
         } catch (exc) {
-            // if (exc instanceof reader.BlankException) { continue; }
+            if (exc instanceof reader.BlankException) { continue; }
             if (exc.stack) { console.log(exc.stack); }
             else           { console.log(exc); }
         }
