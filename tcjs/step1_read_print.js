@@ -15,7 +15,6 @@ function PRINT(a) {
 }
 
 function DEBUG_rep(a) {
-    // return PRINT(EVAL(READ(a)));
     var r = READ(a);
     console.log("read:  ", r);
 
@@ -32,17 +31,20 @@ function rep(a) {
     return PRINT(EVAL(READ(a)));
 }
 
-var readline = require('readline'),
-    rl = readline.createInterface(process.stdin, process.stdout);
+var readline = require('./node_readline.js');
 
-rl.setPrompt('mal> ');
-rl.prompt();
-
-rl.on('line', function(line) {
-    var r = rep(line);
-    console.log(r);
-    rl.prompt();
-}).on('close', function() {
-    console.log('Have a great day!');
-    process.exit(0);
-});
+// repl loop
+if (typeof require !== 'undefined' && require.main === module) {
+    // Synchronous node.js commandline mode
+    while (true) {
+        var line = readline.readline("mal-user> ");
+        if (line === null) { break; }
+        try {
+            if (line) { console.log(rep(line)); }
+        } catch (exc) {
+            // if (exc instanceof reader.BlankException) { continue; }
+            if (exc.stack) { console.log(exc.stack); }
+            else           { console.log(exc); }
+        }
+    }
+}

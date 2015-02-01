@@ -51,11 +51,15 @@ function read_list(r) {
         throw new Error("thought we were reading a list");
     }
 
-    while (r.peek().trim() !== ')') {
+    while (r.peek() && r.peek().trim() !== ')') {
         res.push(read_form(r));
     }
 
-    r.next();
+    var finished = r.next();
+
+    if (!finished || finished.trim() !== ')') {
+        throw new Error("list form not balanced, expected ')'");
+    }
 
     return res;
 }
