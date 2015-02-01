@@ -4,7 +4,11 @@ function pr_quoted(symbol, form) {
 
 function pr_str(x) {
     if (Array.isArray(x)) {
-        return '(' + x.map(pr_str).join(' ') + ')';
+        var isVector = x.vector;
+
+        return (isVector ? '[' : '(') +
+            x.map(pr_str).join(' ') +
+            (isVector ? ']' : ')');
     }
     if (!isNaN(new Number(x))) {
         return x.toString();

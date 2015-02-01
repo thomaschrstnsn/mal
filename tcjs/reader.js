@@ -78,6 +78,27 @@ function read_list(r) {
     return res;
 }
 
+function read_vector(r) {
+    var res = [];
+    res.vector = true;
+
+    if (r.next() !== '[') {
+        throw new Error("thought we were reading a vector");
+    }
+
+    while (r.peek() && r.peek() !== ']') {
+        res.push(read_form(r));
+    }
+
+    var finished = r.next();
+
+    if (!finished || finished !== ']') {
+        throw new Error("vector form not balanced, expected ')'");
+    }
+
+    return res;
+}
+
 function read_quotes(prefix, type, field, r) {
     if (r.next() !== prefix) {
         throw new Error("though we were reading a " + type + " form");
@@ -110,6 +131,7 @@ function read_form(r) {
 
     switch (r.peek()) {
     case '(':    return read_list(r);
+    case '[':    return read_vector(r);
     case "'":    return read_quote(r);
     case '`':    return read_quasiquote(r);
     case '~':    return read_unquote(r);
