@@ -11,7 +11,7 @@ PYTHON = python
 #
 
 IMPLS = bash c clojure coffee cs go haskell java js lua make mal \
-	ocaml perl php ps python r racket ruby rust scala vb
+	ocaml perl php ps python r racket ruby rust scala vb tcjs
 
 step0 = step0_repl
 step1 = step1_read_print
@@ -72,6 +72,7 @@ ruby_STEP_TO_PROG =    ruby/$($(1)).rb
 rust_STEP_TO_PROG =    rust/target/$($(1))
 scala_STEP_TO_PROG =   scala/$($(1)).scala
 vb_STEP_TO_PROG =      vb/$($(1)).exe
+tcjs_STEP_TO_PROG =    tcjs/$($(1)).js
 
 
 bash_RUNSTEP =    bash ../$(2) $(3)
@@ -97,6 +98,7 @@ ruby_RUNSTEP =    ruby ../$(2) $(3)
 rust_RUNSTEP =    ../$(2) $(3)
 scala_RUNSTEP =   sbt 'run-main $($(1))$(if $(3), $(3),)'
 vb_RUNSTEP =      mono ../$(2) --raw $(3)
+tcjs_RUNSTEP =    node ../$(2) $(3)
 
 # Extra options to pass to runtest.py
 cs_TEST_OPTS =  --redirect
@@ -182,4 +184,3 @@ $(IMPL_PERF):
           $(call $(impl)_RUNSTEP,stepA,$(call $(impl)_STEP_TO_PROG,stepA),../tests/perf1.mal); \
 	  echo 'Running: $(call $(impl)_RUNSTEP,stepA,$(call $(impl)_STEP_TO_PROG,stepA),../tests/perf2.mal)'; \
           $(call $(impl)_RUNSTEP,stepA,$(call $(impl)_STEP_TO_PROG,stepA),../tests/perf2.mal))
-
