@@ -33,6 +33,8 @@ function rep(a) {
 
 var readline = require('./node_readline.js');
 
+//rep = DEBUG_rep;
+
 // repl loop
 if (typeof require !== 'undefined' && require.main === module) {
     // Synchronous node.js commandline mode

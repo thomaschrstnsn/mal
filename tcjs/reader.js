@@ -5,14 +5,18 @@ function Reader(tokens) {
         throw new Error("expected array-like");
     }
 
+    function commaTrim(s) {
+        return s && s.replace(/,*/g, '').trim();
+    }
+
     var api = {};
 
     api.next = function() {
-        return tokens[current++];
+        return commaTrim(tokens[current++]);
     };
 
     api.peek = function() {
-        return tokens[current];
+        return commaTrim(tokens[current]);
     };
 
     api.is_finished = function() {
@@ -47,17 +51,17 @@ function read_atom(r) {
 function read_list(r) {
     var res = [];
 
-    if (r.next().trim() !== '(') {
+    if (r.next() !== '(') {
         throw new Error("thought we were reading a list");
     }
 
-    while (r.peek() && r.peek().trim() !== ')') {
+    while (r.peek() && r.peek() !== ')') {
         res.push(read_form(r));
     }
 
     var finished = r.next();
 
-    if (!finished || finished.trim() !== ')') {
+    if (!finished || finished !== ')') {
         throw new Error("list form not balanced, expected ')'");
     }
 
@@ -65,7 +69,7 @@ function read_list(r) {
 }
 
 function read_form(r) {
-    if (r.peek().trim() === '(') {
+    if (r.peek() === '(') {
         return read_list(r);
     }
     return read_atom(r);
@@ -76,12 +80,11 @@ function read_str(input) {
     var reader = Reader(tokens);
     var result = read_form(reader);
 
-    if (!reader.is_finished()) {
-        console.log('WARNING: string was not fully consumed while reading form, next token:', reader.peek());
-    }
+    // if (!reader.is_finished()) {
+    //     console.log('WARNING: string was not fully consumed while reading form, next token:', reader.peek());
+    // }
 
     return result;
 }
 
 exports.read_str = read_str;
-exports.tokenizer = tokenizer;
