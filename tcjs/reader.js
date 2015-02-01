@@ -4,12 +4,12 @@ function BlankException(msg) {
 function Reader(tokens) {
     var current = 0;
 
-    if (!tokens || !tokens.length) {
+    if (!Array.isArray(tokens)) {
         throw new Error("expected array-like");
     }
 
-    if (tokens[0] === null) {
-        throw new BlankException('First token is empty/comment');
+    if (tokens.length === 0) {
+        throw new BlankException();
     }
 
     var api = {};
@@ -31,18 +31,14 @@ function Reader(tokens) {
     return api;
 };
 
-function tokenizer(input) {
-    function trimmer(s) {
-        return s && s.replace(/,*/g, '').trim(); // TODO: goes into strings, not good
-    }
-
-    function comments(s) {
-        if (s[0] === ';') return null;
-        else return s;
-    }
-
+function tokenizer(str) {
     var re = /[\s,]*(~@|[\[\]{}()'`~^@]|"(?:\\.|[^\\"])*"|;.*|[^\s\[\]{}('"`,;)]*)/g;
-    return input.trim().match(re).slice(0, -1).map(trimmer).map(comments);
+    var results = [];
+    while ((match = re.exec(str)[1]) != '') {
+        if (match[0] === ';') { continue; }
+        results.push(match);
+    }
+    return results;
 }
 
 function read_symbol(r) {
@@ -148,6 +144,7 @@ function read_form(r) {
     switch (r.peek()[0]) {
     case ':': return read_keyword(r);
     case '"': return read_string(r);
+    case ';': return null;
     }
 
     switch (r.peek()) {
