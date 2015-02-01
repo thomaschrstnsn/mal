@@ -34,7 +34,17 @@ function tokenizer(input) {
 }
 
 function read_symbol(r) {
-    return {symbol: r.next().trim()};
+    return {symbol: r.next()};
+}
+
+function read_keyword(r) {
+    var kw = r.next().substr(1);
+
+    if (kw === '') {
+        throw new Error('Could not read keyword');
+    }
+
+    return {keyword: kw};
 }
 
 function read_number(r) {
@@ -94,6 +104,10 @@ function read_spliceunquote(r) {
 }
 
 function read_form(r) {
+    if (r.peek()[0] === ':') {
+        return read_keyword(r);
+    }
+
     switch (r.peek()) {
     case '(':    return read_list(r);
     case "'":    return read_quote(r);

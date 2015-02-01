@@ -24,8 +24,11 @@ function pr_str(x) {
     if (x.splice_unquote) {
         return pr_quoted('splice-unquote', x.splice_unquote);
     }
+    if (x.keyword) {
+        return ':' + x.keyword;
+    }
 
-    throw new Error("Unhandled thing: " + x.toString());
+    throw new Error("Unhandled thing");
 }
 
 exports.pr_str = pr_str;
