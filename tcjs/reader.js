@@ -68,11 +68,43 @@ function read_list(r) {
     return res;
 }
 
-function read_form(r) {
-    if (r.peek() === '(') {
-        return read_list(r);
+function read_quote(r) {
+    if (r.next() !== "'") {
+        throw new Error("though we were reading a quoted form");
     }
-    return read_atom(r);
+    return {quote: read_form(r)};
+}
+
+function read_quasiquote(r) {
+    if (r.next() !== "`") {
+        throw new Error("though we were reading a quasiquoted form");
+    }
+    return {quasi: read_form(r)};
+}
+
+function read_unquote(r) {
+    if (r.next() !== "~") {
+        throw new Error("though we were reading a unquoted form");
+    }
+    return {unquote: read_form(r)};
+}
+
+function read_spliceunquote(r) {
+    if (r.next() !== "~@") {
+        throw new Error("though we were reading a splice-unquoted form");
+    }
+    return {splice_unquote: read_form(r)};
+}
+
+function read_form(r) {
+    switch (r.peek()) {
+    case '(':    return read_list(r);
+    case "'":    return read_quote(r);
+    case '`':    return read_quasiquote(r);
+    case '~':    return read_unquote(r);
+    case '~@':   return read_spliceunquote(r);
+    default:     return read_atom(r);
+    }
 }
 
 function read_str(input) {
