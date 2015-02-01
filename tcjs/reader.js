@@ -68,32 +68,29 @@ function read_list(r) {
     return res;
 }
 
-function read_quote(r) {
-    if (r.next() !== "'") {
-        throw new Error("though we were reading a quoted form");
+function read_quotes(prefix, type, field, r) {
+    if (r.next() !== prefix) {
+        throw new Error("though we were reading a " + type + " form");
     }
-    return {quote: read_form(r)};
+    var res = {};
+    res[field] = read_form(r);
+    return res;
+}
+
+function read_quote(r) {
+    return read_quotes("'", 'quoted', 'quote', r);
 }
 
 function read_quasiquote(r) {
-    if (r.next() !== "`") {
-        throw new Error("though we were reading a quasiquoted form");
-    }
-    return {quasi: read_form(r)};
+    return read_quotes('`', 'quasiquoted', 'quasi', r);
 }
 
 function read_unquote(r) {
-    if (r.next() !== "~") {
-        throw new Error("though we were reading a unquoted form");
-    }
-    return {unquote: read_form(r)};
+    return read_quotes('~', 'unquoted', 'unquote', r);
 }
 
 function read_spliceunquote(r) {
-    if (r.next() !== "~@") {
-        throw new Error("though we were reading a splice-unquoted form");
-    }
-    return {splice_unquote: read_form(r)};
+    return read_quotes('~@', 'splice-unquoted', 'splice_unquote', r);
 }
 
 function read_form(r) {

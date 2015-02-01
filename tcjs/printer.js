@@ -1,3 +1,7 @@
+function pr_quoted(symbol, form) {
+    return '(' + symbol + ' ' + pr_str(form) + ')';
+}
+
 function pr_str(x) {
     if (Array.isArray(x)) {
         return '(' + x.map(pr_str).join(' ') + ')';
@@ -9,16 +13,16 @@ function pr_str(x) {
         return x.symbol;
     }
     if (x.quote) {
-        return '(quote ' + pr_str(x.quote) + ')';
+        return pr_quoted('quote', x.quote);
     }
     if (x.quasi) {
-        return '(quasiquote ' + pr_str(x.quasi) + ')';
+        return pr_quoted('quasiquote', x.quasi);
     }
     if (x.unquote) {
-        return '(unquote ' + pr_str(x.unquote) + ')';
+        return pr_quoted('unquote', x.unquote);
     }
     if (x.splice_unquote) {
-        return '(splice-unquote ' + pr_str(x.splice_unquote) + ')';
+        return pr_quoted('splice-unquote', x.splice_unquote);
     }
 
     throw new Error("Unhandled thing: " + x.toString());
