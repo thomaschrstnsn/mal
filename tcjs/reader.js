@@ -60,7 +60,9 @@ function read_keyword(r) {
         throw new Error('Could not read keyword');
     }
 
-    return {keyword: kw};
+    var keywordMarker = require('./types').keywordMarker;
+
+    return keywordMarker + kw;
 }
 
 function read_number(r) {
@@ -134,8 +136,8 @@ function read_map(r) {
     while (r.peek() && r.peek() !== '}') {
         var key = read_form(r);
 
-        if (!key.keyword) {
-            throw new Error("only keywords supported as keys");
+        if (typeof key !== 'string') {
+            throw new Error("only strings/keywords supported as keys");
         }
 
         if (r.peek() === '}') {
@@ -143,7 +145,7 @@ function read_map(r) {
         }
 
         var value = read_form(r);
-        res[key.keyword] = value;
+        res[key] = value;
     }
 
     var finished = r.next();

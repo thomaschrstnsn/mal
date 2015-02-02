@@ -2,11 +2,16 @@ function pr_quoted(symbol, form) {
     return '(' + symbol + ' ' + pr_str(form) + ')';
 }
 
+var keywordMarker = require('./types').keywordMarker;
+
 function pr_str(x) {
     if (x === null) {
         return 'nil';
     }
     if (typeof x === 'string') {
+        if (x[0] === keywordMarker) {
+            return ':' + x.substr(1);
+        }
         return '"' + x + '"';
     }
     if (Array.isArray(x)) {
@@ -16,7 +21,7 @@ function pr_str(x) {
     }
     if (x.malMap) {
         return '{' + Object.keys(x).map(function (k) {
-            return ':'+k + ' ' + pr_str(x[k]);
+            return pr_str(k) + ' ' + pr_str(x[k]);
         }).join(', ') + '}';
     }
     if (!isNaN(new Number(x))) {
@@ -36,9 +41,6 @@ function pr_str(x) {
     }
     if (x.splice_unquote) {
         return pr_quoted('splice-unquote', x.splice_unquote);
-    }
-    if (x.keyword) {
-        return ':' + x.keyword;
     }
 
     throw new Error("Unhandled thing");
