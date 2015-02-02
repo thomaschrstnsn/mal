@@ -10,11 +10,14 @@ function pr_str(x) {
         return '"' + x + '"';
     }
     if (Array.isArray(x)) {
-        var isVector = x.vector;
-
-        return (isVector ? '[' : '(') +
+        return (x.malVector ? '[' : '(') +
             x.map(pr_str).join(' ') +
-            (isVector ? ']' : ')');
+            (x.malVector ? ']' : ')');
+    }
+    if (x.malMap) {
+        return '{' + Object.keys(x).map(function (k) {
+            return ':'+k + ' ' + pr_str(x[k]);
+        }).join(', ') + '}';
     }
     if (!isNaN(new Number(x))) {
         return x.toString();

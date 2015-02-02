@@ -94,9 +94,17 @@ function read_list(r) {
     return res;
 }
 
+function assignType(obj, type) {
+    return Object.defineProperty(obj, type,
+                                 {enumerable: false,
+                                  writable: false,
+                                  configurable: false,
+                                  value: true});
+}
+
 function read_vector(r) {
     var res = [];
-    res.vector = true;
+    assignType(res, 'malVector');
 
     if (r.next() !== '[') {
         throw new Error("thought we were reading a vector");
@@ -110,6 +118,38 @@ function read_vector(r) {
 
     if (!finished || finished !== ']') {
         throw new Error("vector form not balanced, expected ')'");
+    }
+
+    return res;
+}
+
+function read_map(r) {
+    var res = {};
+    assignType(res, 'malMap');
+
+    if (r.next() !== '{') {
+        throw new Error("thought we were reading a map");
+    }
+
+    while (r.peek() && r.peek() !== '}') {
+        var key = read_form(r);
+
+        if (!key.keyword) {
+            throw new Error("only keywords supported as keys");
+        }
+
+        if (r.peek() === '}') {
+            throw new Error("unpaired key reading map form");
+        }
+
+        var value = read_form(r);
+        res[key.keyword] = value;
+    }
+
+    var finished = r.next();
+
+    if (!finished || finished !== '}') {
+        throw new Error("map form not balanced, expected '}'");
     }
 
     return res;
@@ -150,6 +190,7 @@ function read_form(r) {
     switch (r.peek()) {
     case '(':    return read_list(r);
     case '[':    return read_vector(r);
+    case '{':    return read_map(r);
     case "'":    return read_quote(r);
     case '`':    return read_quasiquote(r);
     case '~':    return read_unquote(r);
