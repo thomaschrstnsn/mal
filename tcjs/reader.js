@@ -41,8 +41,10 @@ function tokenizer(str) {
     return results;
 }
 
+var types = require('./types');
+
 function read_symbol(r) {
-    return {symbol: r.next()};
+    return types.str2symbol(r.next());
 }
 
 function read_string(r) {
@@ -60,9 +62,7 @@ function read_keyword(r) {
         throw new Error('Could not read keyword');
     }
 
-    var keywordMarker = require('./types').keywordMarker;
-
-    return keywordMarker + kw;
+    return types.str2keyword(kw);
 }
 
 function read_number(r) {
@@ -78,6 +78,7 @@ function read_atom(r) {
 
 function read_list(r) {
     var res = [];
+    types.toList(res);
 
     if (r.next() !== '(') {
         throw new Error("thought we were reading a list");
@@ -96,17 +97,9 @@ function read_list(r) {
     return res;
 }
 
-function assignType(obj, type) {
-    return Object.defineProperty(obj, type,
-                                 {enumerable: false,
-                                  writable: false,
-                                  configurable: false,
-                                  value: true});
-}
-
 function read_vector(r) {
     var res = [];
-    assignType(res, 'malVector');
+    types.toVector(res);
 
     if (r.next() !== '[') {
         throw new Error("thought we were reading a vector");
@@ -127,7 +120,7 @@ function read_vector(r) {
 
 function read_map(r) {
     var res = {};
-    assignType(res, 'malMap');
+    types.toMap(res);
 
     if (r.next() !== '{') {
         throw new Error("thought we were reading a map");
@@ -157,29 +150,10 @@ function read_map(r) {
     return res;
 }
 
-function read_quotes(prefix, type, field, r) {
-    if (r.next() !== prefix) {
-        throw new Error("though we were reading a " + type + " form");
-    }
-    var res = {};
-    res[field] = read_form(r);
-    return res;
-}
-
-function read_quote(r) {
-    return read_quotes("'", 'quoted', 'quote', r);
-}
-
-function read_quasiquote(r) {
-    return read_quotes('`', 'quasiquoted', 'quasi', r);
-}
-
-function read_unquote(r) {
-    return read_quotes('~', 'unquoted', 'unquote', r);
-}
-
-function read_spliceunquote(r) {
-    return read_quotes('~@', 'splice-unquoted', 'splice_unquote', r);
+function read_quotes(type, r) {
+    r.next();
+    var form = read_form(r);
+    return types.quotedForm(form, type);
 }
 
 function read_form(r) {
@@ -189,14 +163,15 @@ function read_form(r) {
     case ';': return null;
     }
 
+    var quoteShortHand = types.quoteShortHands[r.peek()];
+    if (quoteShortHand) {
+        return read_quotes(quoteShortHand, r);
+    }
+
     switch (r.peek()) {
     case '(':    return read_list(r);
     case '[':    return read_vector(r);
     case '{':    return read_map(r);
-    case "'":    return read_quote(r);
-    case '`':    return read_quasiquote(r);
-    case '~':    return read_unquote(r);
-    case '~@':   return read_spliceunquote(r);
     case 'true': return true;
     case 'false':return false;
     case 'nil':  return null;

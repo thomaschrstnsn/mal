@@ -1,25 +1,28 @@
-function pr_quoted(symbol, form) {
-    return '(' + symbol + ' ' + pr_str(form) + ')';
-}
-
+var types = require('./types');
 var keywordMarker = require('./types').keywordMarker;
+
+function pr_seq(x, prefix, postfix) {
+    return prefix + x.map(pr_str).join(' ') + postfix;
+}
 
 function pr_str(x) {
     if (x === null) {
         return 'nil';
     }
+
+    if (types.isKeyword(x)) {
+        return ':' + types.nameOf(x);
+    }
     if (typeof x === 'string') {
-        if (x[0] === keywordMarker) {
-            return ':' + x.substr(1);
-        }
         return '"' + x + '"';
     }
-    if (Array.isArray(x)) {
-        return (x.malVector ? '[' : '(') +
-            x.map(pr_str).join(' ') +
-            (x.malVector ? ']' : ')');
+    if (types.isVector(x)) {
+        return pr_seq(x, '[', ']');
     }
-    if (x.malMap) {
+    if (types.isList(x)) {
+        return pr_seq(x, '(', ')');
+    }
+    if (types.isMap(x)) {
         return '{' + Object.keys(x).map(function (k) {
             return pr_str(k) + ' ' + pr_str(x[k]);
         }).join(', ') + '}';
@@ -27,20 +30,11 @@ function pr_str(x) {
     if (!isNaN(new Number(x))) {
         return x.toString();
     }
-    if (x.symbol) {
-        return x.symbol;
+    if (types.isSymbol(x)) {
+        return types.nameOf(x);
     }
-    if (x.quote) {
-        return pr_quoted('quote', x.quote);
-    }
-    if (x.quasi) {
-        return pr_quoted('quasiquote', x.quasi);
-    }
-    if (x.unquote) {
-        return pr_quoted('unquote', x.unquote);
-    }
-    if (x.splice_unquote) {
-        return pr_quoted('splice-unquote', x.splice_unquote);
+    if (types.isQuoted(x)) {
+        return '(' + types.quoteType(x) + ' ' + pr_str(types.getQuoted(x)) + ')';
     }
 
     throw new Error("Unhandled thing");
