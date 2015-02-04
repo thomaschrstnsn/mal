@@ -36,6 +36,9 @@ function pr_str(x) {
     if (types.isQuoted(x)) {
         return '(' + types.quoteType(x) + ' ' + pr_str(types.getQuoted(x)) + ')';
     }
+    if (typeof x === 'function') {
+        return '#func"'+ x.toString() + '"';
+    }
 
     throw new Error("Unhandled thing");
 }

@@ -1,4 +1,4 @@
-function Env(outer) {
+function Env(outer, binds, exprs) {
     var data = {};
 
     var api = {};
@@ -32,6 +32,14 @@ function Env(outer) {
     api.keys = function() {
         return Object.keys(data);
     };
+
+    if (binds) {
+        for (var i = 0; i < binds.length; i++) {
+            var key = binds[i];
+            var val = exprs[i];
+            api.set(key, val);
+        }
+    }
 
     return api;
 }
