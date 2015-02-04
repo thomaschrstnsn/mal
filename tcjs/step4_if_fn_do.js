@@ -1,3 +1,5 @@
+var _ = require('lodash');
+
 var reader = require('./reader.js'),
     read_str = reader.read_str;
 
@@ -155,13 +157,17 @@ function PRINT(a) {
 
 var Env = require('./env').Env;
 
-var floorIt = Math.floor;
-
 var repl_env = Env(null);
-repl_env.set('+', function (a, b) { return floorIt(a + b);});
-repl_env.set('-', function (a, b) { return floorIt(a - b);});
-repl_env.set('*', function (a, b) { return floorIt(a * b);});
-repl_env.set('/', function (a, b) { return floorIt(a / b);});
+
+function import_ns(ns, env) {
+    _.forEach(ns, function (val, sym) {
+        env.set(sym, val);
+    });
+}
+
+var core = require('./core');
+
+import_ns(core, repl_env);
 
 function rep(a) {
     return PRINT(EVAL(READ(a), repl_env));
