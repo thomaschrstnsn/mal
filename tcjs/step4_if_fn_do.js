@@ -101,6 +101,31 @@ function do_form(ast, env) {
     return ast.slice(1).map(function (step) { return EVAL(step, env);}).pop();
 }
 
+function fn_form(ast, env) {
+    if (ast.length !== 3) {
+        throw new Error('expected 3 elements in fn form');
+    }
+
+    var argList = ast[1];
+
+    if (!types.isList(argList) && !types.isVector(argList)) {
+        throw new Error('expected list/vector of argument bindings');
+    }
+
+    if (!argList.map(types.isSymbol).reduce(function(prev, cur) {
+        return prev && cur;
+    }, true)) {
+        throw new Error('expected only symbols in argument bindings');
+    }
+
+    var body = ast[2];
+    var argSyms = argList.map(types.nameOf);
+
+    return function () {
+        return EVAL(body, Env(env, argSyms, arguments));
+    };
+}
+
 function EVAL(ast, env) {
     if (ast !== null && types.isList(ast)) {
         var first = ast[0];
@@ -110,6 +135,7 @@ function EVAL(ast, env) {
             case 'let*': return let_form(ast, env);
             case 'if':   return if_form(ast, env);
             case 'do':   return do_form(ast, env);
+            case 'fn*':  return fn_form(ast, env);
             }
         }
 
