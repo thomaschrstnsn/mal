@@ -12,11 +12,17 @@ function eval_ast(ast, env) {
         var symbol = types.nameOf(ast);
         return env.get(symbol);
     }
-    if (types.isList(ast)) {
+    if (types.isList(ast) || types.isVector(ast)) {
         var res = ast.map(function (x) {
             return EVAL(x, env);
         });
-        types.toList(res);
+        if (types.isList(ast)) {
+            types.toList(res);
+        }
+        else {
+            types.toVector(res);
+        }
+
         return res;
     }
     return ast;
@@ -84,6 +90,7 @@ function EVAL(ast, env) {
         var func = evaled.shift();
         return func.apply(undefined, evaled);
     }
+
     return eval_ast(ast, env);
 }
 
