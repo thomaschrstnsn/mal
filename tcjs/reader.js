@@ -172,9 +172,9 @@ function read_form(r) {
     case '(':    return read_list(r);
     case '[':    return read_vector(r);
     case '{':    return read_map(r);
-    case 'true': return true;
-    case 'false':return false;
-    case 'nil':  return null;
+    case 'true': r.next(); return true;
+    case 'false':r.next(); return false;
+    case 'nil':  r.next(); return null;
     default:     return read_atom(r);
     }
 }
