@@ -24,7 +24,7 @@ function eval_ast(ast, env) {
 
 function define_form(ast, env) {
     if (ast.length !== 3) {
-        throw new Error('expected 3 element in define form');
+        throw new Error('expected 3 elements in define form');
     }
 
     if (!types.isSymbol(ast[1])) {
@@ -35,7 +35,39 @@ function define_form(ast, env) {
     var val = EVAL(ast[2], env);
     env.set(key, val);
 
-    return null;
+    return val;
+}
+
+function let_form(ast, env) {
+    if (ast.length !== 3) {
+        throw new Error('expected 3 elements in let* form');
+    }
+    var bindings = ast[1];
+
+    if (!types.isList(bindings) && !types.isVector(bindings)) {
+        throw new Error('expected second element in let* form to be list or vector');
+    }
+
+    if (!(types.length % 2) === 0) {
+        throw new Error('expected even number of elements in bindings to let form');
+    }
+
+    var letEnv = Env(env);
+    while (bindings.length > 0) {
+        var sym = bindings.shift();
+        var unevalVal = bindings.shift();
+
+        if (!types.isSymbol(sym)) {
+            throw new Error('expected even element in bindings to let form to be symbol');
+        }
+
+        var val = EVAL(unevalVal, letEnv);
+
+        letEnv.set(types.nameOf(sym), val);
+    }
+
+    var form = ast[2];
+    return EVAL(form, letEnv);
 }
 
 function EVAL(ast, env) {
