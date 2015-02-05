@@ -12,7 +12,7 @@ function Env(outer, binds, exprs) {
 
     api.find = function(key) {
         var found = data[key];
-        if (found) {
+        if (found !== undefined) {
             return found;
         }
 
