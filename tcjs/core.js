@@ -4,7 +4,7 @@ var types = require('./types');
 var floorIt = Math.floor;
 
 function reduceFunc(fn, args) {
-    return _.chain(args).values().reduce(fn);
+    return _.chain(args).values().reduce(fn).value();
 }
 
 function add(a, b) {
@@ -50,10 +50,47 @@ function empty(x) {
 }
 
 function count(x) {
+    if (x === null) {
+        return 0;
+    }
     return x.length;
 }
 
+function seq_eq(a, b) {
+    return a.length === b.length &&
+        _.chain(a).zip(b).every(function (vs) {
+            return eq(vs[0], vs[1]);
+        }).value();
+}
+
 function eq(a, b) {
+    function bothAre(pred) {
+        return pred(a) && pred(b);
+    };
+
+    if (a === null || b === null) {
+        return a === b;
+    }
+    if (bothAre(types.isList)) {
+        return seq_eq(a, b);
+    }
+    if (bothAre(types.isVector)) {
+        return seq_eq(a, b);
+    }
+    if (bothAre(types.isKeyword)) {
+        return types.nameOf(a) === types.nameOf(b);
+    }
+    if (bothAre(types.isSymbol)) {
+        return types.nameOf(a) === types.nameOf(b);
+    }
+    if (bothAre(types.isQuoted)) {
+        return types.quoteType(a) === types.quoteType(b) &&
+            eq(types.getQuoted(a), types.getQuoted(b));
+    }
+    if (bothAre(types.isString)) {
+        return a === b;
+    }
+
     return a === b;
 }
 

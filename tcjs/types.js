@@ -15,15 +15,15 @@ function inverseStringMap(map) {
     return inv;
 }
 
-exports.quoteTypes = {quote: '\'',
-                      quasiquote: '`',
-                      unquote: '~',
-                      'splice-unquote': '~@'};
+var quoteTypes = {quote: '\'',
+                  quasiquote: '`',
+                  unquote: '~',
+                  'splice-unquote': '~@'};
 
-exports.quoteShortHands = inverseStringMap(exports.quoteTypes);
+var quoteShortHands = inverseStringMap(exports.quoteTypes);
 
 function quotedForm(form, quoteType) {
-    if (!exports.quoteTypes[quoteType]) {
+    if (!quoteTypes[quoteType]) {
         throw new Error("unknown quotetype: " + quoteType);
     }
     var q = {quoted: form};
@@ -107,24 +107,26 @@ function nameOf(obj) {
     throw new Error("unhandled object in nameOf");
 }
 
-exports.getQuoted = getQuoted;
-exports.quotedForm = quotedForm;
-exports.isQuoted = isQuoted;
-exports.quoteType = quoteType;
+function isString(obj) {
+    return typeof obj === 'string' && !isKeyword(obj);
+}
 
-exports.toList = toList;
-exports.isList = isList;
-
-exports.toVector = toVector;
-exports.isVector = isVector;
-
-exports.toMap = toMap;
-exports.isMap = isMap;
-
-exports.str2symbol = str2symbol;
-exports.isSymbol = isSymbol;
-
-exports.str2keyword = str2keyword;
-exports.isKeyword = isKeyword;
-
-exports.nameOf = nameOf;
+module.exports = {quoteTypes: quoteTypes,
+                  quoteShortHands: quoteShortHands,
+                  getQuoted: getQuoted,
+                  quotedForm: quotedForm,
+                  isQuoted: isQuoted,
+                  quoteType: quoteType,
+                  toList: toList,
+                  isList: isList,
+                  toVector: toVector,
+                  isVector: isVector,
+                  toMap: toMap,
+                  isMap: isMap,
+                  str2symbol: str2symbol,
+                  isSymbol: isSymbol,
+                  str2keyword: str2keyword,
+                  isKeyword: isKeyword,
+                  nameOf: nameOf,
+                  isString: isString
+                 };
