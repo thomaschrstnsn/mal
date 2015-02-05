@@ -1,3 +1,6 @@
+var types = require('./types');
+var _ = require('lodash');
+
 function Env(outer, binds, exprs) {
     var data = {};
 
@@ -25,8 +28,8 @@ function Env(outer, binds, exprs) {
         if (found !== undefined) {
             return found;
         }
-
-        throw new Error('could not find key: ' + key + ' in env');
+        console.log('unable to get:', key, 'in:', data);
+        throw new Error('could not find key: ' + key);
     };
 
     api.keys = function() {
@@ -36,6 +39,13 @@ function Env(outer, binds, exprs) {
     if (binds) {
         for (var i = 0; i < binds.length; i++) {
             var key = binds[i];
+            if (key === '&') {
+                var restSym = binds[i+1];
+                var restExprs = _.values(exprs).slice(i);
+                types.toList(restExprs);
+                api.set(restSym, restExprs);
+                break;
+            }
             var val = exprs[i];
             api.set(key, val);
         }
