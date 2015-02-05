@@ -173,6 +173,8 @@ function rep(a) {
     return PRINT(EVAL(READ(a), repl_env));
 }
 
+rep("(def! not (fn* (a) (if a false true)))");
+
 function DEBUG_rep(a) {
     console.log('env: ', repl_env.keys());
 
