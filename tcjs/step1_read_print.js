@@ -12,7 +12,7 @@ function EVAL(a) {
 var pr_str = require('./printer.js').pr_str;
 
 function PRINT(a) {
-    return pr_str(a);
+    return pr_str(a, true);
 }
 
 function DEBUG_rep(a) {

@@ -20,7 +20,7 @@ var quoteTypes = {quote: '\'',
                   unquote: '~',
                   'splice-unquote': '~@'};
 
-var quoteShortHands = inverseStringMap(exports.quoteTypes);
+var quoteShortHands = inverseStringMap(quoteTypes);
 
 function quotedForm(form, quoteType) {
     if (!quoteTypes[quoteType]) {
