@@ -152,7 +152,7 @@ function EVAL(ast, env) {
 var pr_str = require('./printer.js').pr_str;
 
 function PRINT(a) {
-    return pr_str(a);
+    return pr_str(a, true);
 }
 
 var Env = require('./env').Env;

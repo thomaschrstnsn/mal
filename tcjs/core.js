@@ -1,5 +1,6 @@
 var _ = require('lodash');
 var types = require('./types');
+var printer = require('./printer');
 
 var floorIt = Math.floor;
 
@@ -67,14 +68,11 @@ function eq(a, b) {
     function bothAre(pred) {
         return pred(a) && pred(b);
     };
-
     if (a === null || b === null) {
         return a === b;
     }
-    if (bothAre(types.isList)) {
-        return seq_eq(a, b);
-    }
-    if (bothAre(types.isVector)) {
+    if ((types.isList(a) || types.isVector(a)) &&
+        (types.isList(b) || types.isVector(b))) {
         return seq_eq(a, b);
     }
     if (bothAre(types.isKeyword)) {
@@ -110,6 +108,37 @@ function gte(a,b) {
     return a >= b;
 }
 
+function print_joined(args, print_readably, joiner) {
+    if (args.length === 0) {
+        return '';
+    }
+    return _.chain(args)
+        .values()
+        .map(function (x) {return printer.pr_str(x, print_readably);})
+        .reduce(function (a,b) { return a + joiner + b;})
+        .value();
+}
+
+function pr_str() {
+    return print_joined(arguments, true, ' ');
+}
+
+function str() {
+    return print_joined(arguments, false, '');
+}
+
+function prn() {
+    var toPrint = print_joined(arguments, true, ' ');
+    console.log(toPrint);
+    return null;
+}
+
+function println() {
+    var toPrint = print_joined(arguments, false, ' ');
+    console.log(toPrint);
+    return null;
+}
+
 module.exports = {'+': plus,
                   '-': minus,
                   '/': slash,
@@ -122,5 +151,9 @@ module.exports = {'+': plus,
                   '<': lt,
                   '<=': lte,
                   '>': gt,
-                  '>=': gte
+                  '>=': gte,
+                  'pr-str': pr_str,
+                  'str': str,
+                  'prn': prn,
+                  'println': println
                  };

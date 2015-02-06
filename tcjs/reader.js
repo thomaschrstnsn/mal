@@ -47,12 +47,18 @@ function read_symbol(r) {
     return types.str2symbol(r.next());
 }
 
+function unescape_string(s) {
+    return s.replace(/\\\\/g,'\\')
+        .replace(/\\n/g, '\n')
+        .replace(/\\"/g, '"');
+}
+
 function read_string(r) {
     var s = r.next();
     if (s[0] !== '"' || s[s.length - 1] !== '"') {
         throw new Error("problem reading string: " + s);
     }
-    return s.substr(1, s.length - 2);
+    return unescape_string(s.substr(1, s.length - 2));
 }
 
 function read_keyword(r) {

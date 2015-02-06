@@ -1,11 +1,17 @@
 var types = require('./types');
 var keywordMarker = require('./types').keywordMarker;
 
-function pr_seq(x, prefix, postfix) {
-    return prefix + x.map(pr_str).join(' ') + postfix;
+function pr_seq(x, prefix, postfix, printer) {
+    return prefix + x.map(printer).join(' ') + postfix;
 }
 
-function pr_str(x) {
+function escape_string(x) {
+    return x.replace(/\\/g, '\\\\')
+        .replace(/"/g, '\\"')
+        .replace(/\n/g, '\\n');
+}
+
+function pr_str(x, print_readably) {
     if (x === null) {
         return 'nil';
     }
@@ -14,17 +20,24 @@ function pr_str(x) {
         return ':' + types.nameOf(x);
     }
     if (typeof x === 'string') {
-        return '"' + x + '"';
+        if (print_readably) {
+            return '"' + escape_string(x) + '"';
+        }
+        return x;
     }
+    var printer = function (a) {
+        return pr_str(a, print_readably);
+    };
     if (types.isVector(x)) {
-        return pr_seq(x, '[', ']');
+        return pr_seq(x, '[', ']', printer);
     }
     if (types.isList(x)) {
-        return pr_seq(x, '(', ')');
+        return pr_seq(x, '(', ')', printer);
     }
     if (types.isMap(x)) {
         return '{' + Object.keys(x).map(function (k) {
-            return pr_str(k) + ' ' + pr_str(x[k]);
+            return pr_str(k, print_readably) + ' ' +
+                pr_str(x[k], print_readably);
         }).join(', ') + '}';
     }
     if (!isNaN(new Number(x))) {
@@ -34,7 +47,8 @@ function pr_str(x) {
         return types.nameOf(x);
     }
     if (types.isQuoted(x)) {
-        return '(' + types.quoteType(x) + ' ' + pr_str(types.getQuoted(x)) + ')';
+        return '(' + types.quoteType(x) + ' ' +
+            pr_str(types.getQuoted(x), print_readably) + ')';
     }
     if (typeof x === 'function') {
         return '#func"'+ x.toString() + '"';
