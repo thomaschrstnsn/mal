@@ -29,6 +29,16 @@ function eval_ast(ast, env) {
 
         return res;
     }
+    if (types.isMap(ast)) {
+        var res = {};
+        _.forEach(ast, function (val, key) {
+            var eKey = EVAL(key, env);
+            var eVal = EVAL(val, env);
+            res[eKey] = eVal;
+        });
+        types.toMap(res);
+        return res;
+    }
     return ast;
 }
 

@@ -1,3 +1,4 @@
+var _ = require('lodash');
 var reader = require('./reader.js'),
     read_str = reader.read_str;
 
@@ -17,11 +18,26 @@ function eval_ast(ast, env) {
         }
         return el;
     }
-    if (types.isList(ast)) {
+    if (types.isList(ast) || types.isVector(ast)) {
         var res = ast.map(function (x) {
             return EVAL(x, env);
         });
-        types.toList(res);
+        if (types.isList(ast)) {
+            types.toList(res);
+        }
+        if (types.isVector(ast)) {
+            types.toVector(res);
+        }
+        return res;
+    }
+    if (types.isMap(ast)) {
+        var res = {};
+        _.forEach(ast, function (val, key) {
+            var eKey = EVAL(key, env);
+            var eVal = EVAL(val, env);
+            res[eKey] = eVal;
+        });
+        types.toMap(res);
         return res;
     }
     return ast;
@@ -39,7 +55,7 @@ function EVAL(ast, env) {
 var pr_str = require('./printer.js').pr_str;
 
 function PRINT(a) {
-    return pr_str(a);
+    return pr_str(a, true);
 }
 
 function DEBUG_rep(a) {
