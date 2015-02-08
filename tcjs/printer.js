@@ -53,7 +53,11 @@ function pr_str(x, print_readably) {
     if (typeof x === 'function') {
         return '#func"'+ x.toString() + '"';
     }
+    if (x.fn && x.ast && x.params && x.env) {
+        return '#func"'+ x.fn.toString() + '"';
+    }
 
+    console.log("do not know how to print:", x);
     throw new Error("Unhandled thing");
 }
 
