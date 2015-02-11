@@ -33,7 +33,8 @@ function Env(outer, binds, exprs) {
     };
 
     api.keys = function() {
-        return Object.keys(data);
+        var outerKeys = (outer && outer.keys()) || [];
+        return [Object.keys(data)].concat(outerKeys);
     };
 
     if (binds) {

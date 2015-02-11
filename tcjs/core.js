@@ -139,6 +139,18 @@ function println() {
     return null;
 }
 
+var read_str = require('./reader').read_str;
+
+function read_string(s) {
+    return read_str(s);
+}
+
+var fs = require('fs');
+
+function slurp(filename) {
+    return fs.readFileSync(filename, {encoding: 'utf8'});
+}
+
 module.exports = {'+': plus,
                   '-': minus,
                   '/': slash,
@@ -155,5 +167,7 @@ module.exports = {'+': plus,
                   'pr-str': pr_str,
                   'str': str,
                   'prn': prn,
-                  'println': println
+                  'println': println,
+                  'read-string': read_string,
+                  'slurp': slurp
                  };
