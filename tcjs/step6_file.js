@@ -237,25 +237,37 @@ function DEBUG_rep(a) {
     return p;
 }
 
-var readline = require('./node_readline.js');
+var malArgv = process.argv.slice(3);
+types.toList(malArgv);
+
+repl_env.set('*ARGV*', malArgv);
+
+function repl() {
+    var readline = require('./node_readline.js');
+    // repl loop
+    if (typeof require !== 'undefined' && require.main === module) {
+        // Synchronous node.js commandline mode
+        while (true) {
+            var line = readline.readline("mal-user> ");
+            if (line === null) { break; }
+            try {
+                if (line) { console.log(rep(line)); }
+            } catch (exc) {
+                if (exc instanceof reader.BlankException) { continue; }
+                if (exc.stack) { console.log(exc.stack); }
+                else           { console.log(exc); }
+            }
+        }
+    }
+}
 
 if (process.argv[2] === 'debug') {
     console.log("debugging REPL");
     rep = DEBUG_rep;
-}
-
-// repl loop
-if (typeof require !== 'undefined' && require.main === module) {
-    // Synchronous node.js commandline mode
-    while (true) {
-        var line = readline.readline("mal-user> ");
-        if (line === null) { break; }
-        try {
-            if (line) { console.log(rep(line)); }
-        } catch (exc) {
-            if (exc instanceof reader.BlankException) { continue; }
-            if (exc.stack) { console.log(exc.stack); }
-            else           { console.log(exc); }
-        }
-    }
+    repl();
+} else if (process.argv.length > 2) {
+    var fileToLoad = process.argv[2];
+    rep('(load-file "' + fileToLoad + '")');
+} else {
+    repl();
 }
