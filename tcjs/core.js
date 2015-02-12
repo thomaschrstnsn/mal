@@ -151,6 +151,20 @@ function slurp(filename) {
     return fs.readFileSync(filename, {encoding: 'utf8'});
 }
 
+function concatTwo(xs, ys) {
+    return xs.concat(ys);
+}
+
+function concat() {
+    var res = _.chain(arguments).values().reduce(concatTwo, []).value();
+    types.toList(res);
+    return res;
+}
+
+function cons(x, xs) {
+    return concat([x], xs);
+}
+
 module.exports = {'+': plus,
                   '-': minus,
                   '/': slash,
@@ -169,5 +183,7 @@ module.exports = {'+': plus,
                   'prn': prn,
                   'println': println,
                   'read-string': read_string,
-                  'slurp': slurp
+                  'slurp': slurp,
+                  'cons': cons,
+                  'concat': concat
                  };
