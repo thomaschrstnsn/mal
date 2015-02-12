@@ -81,10 +81,6 @@ function eq(a, b) {
     if (bothAre(types.isSymbol)) {
         return types.nameOf(a) === types.nameOf(b);
     }
-    if (bothAre(types.isQuoted)) {
-        return types.quoteType(a) === types.quoteType(b) &&
-            eq(types.getQuoted(a), types.getQuoted(b));
-    }
     if (bothAre(types.isString)) {
         return a === b;
     }

@@ -159,8 +159,16 @@ function read_map(r) {
 function read_quotes(type, r) {
     r.next();
     var form = read_form(r);
-    return types.quotedForm(form, type);
+
+    var formList = [types.str2symbol(type), form];
+    types.toList(formList);
+    return formList;
 }
+
+var quoteShortHandsToQuoteSymbol = {"'": 'quote',
+                                    '`': 'quasiquote',
+                                    '~': 'unquote',
+                                    '~@': 'splice-unquote'};
 
 function read_form(r) {
     switch (r.peek()[0]) {
@@ -169,9 +177,9 @@ function read_form(r) {
     case ';': return null;
     }
 
-    var quoteShortHand = types.quoteShortHands[r.peek()];
-    if (quoteShortHand) {
-        return read_quotes(quoteShortHand, r);
+    var quoteSymbol = quoteShortHandsToQuoteSymbol[r.peek()];
+    if (quoteSymbol) {
+        return read_quotes(quoteSymbol, r);
     }
 
     switch (r.peek()) {

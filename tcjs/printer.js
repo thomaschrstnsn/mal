@@ -45,10 +45,6 @@ function pr_str(x, print_readably) {
     if (types.isSymbol(x)) {
         return types.nameOf(x);
     }
-    if (types.isQuoted(x)) {
-        return '(' + types.quoteType(x) + ' ' +
-            pr_str(types.getQuoted(x), print_readably) + ')';
-    }
     if (typeof x === 'function') {
         return '#func"'+ x.toString() + '"';
     }

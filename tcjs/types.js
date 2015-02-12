@@ -6,55 +6,6 @@ function assignType(obj, type, value) {
                                   value: value || true});
 }
 
-function inverseStringMap(map) {
-    var inv = {};
-    for (var key in map) {
-        var value = map[key];
-        inv[value] = key;
-    }
-    return inv;
-}
-
-var quoteTypes = {quote: '\'',
-                  quasiquote: '`',
-                  unquote: '~',
-                  'splice-unquote': '~@'};
-
-var quoteShortHands = inverseStringMap(quoteTypes);
-
-function quotedForm(form, quoteType) {
-    if (!quoteTypes[quoteType]) {
-        throw new Error("unknown quotetype: " + quoteType);
-    }
-    var q = {quoted: form};
-    assignType(q, 'malQuoted', quoteType);
-    return q;
-}
-
-function isQuoted(obj, quoteType) {
-    if (obj.malQuoted) {
-        if (quoteType) {
-            return obj.malQuoted === quoteType;
-        }
-        return true;
-    }
-    return false;
-}
-
-function quoteType(obj) {
-    if (isQuoted(obj)) {
-        return obj.malQuoted;
-    }
-    throw new Error('quoteType called with non-quote');
-}
-
-function getQuoted(obj) {
-    if (isQuoted(obj)) {
-        return obj.quoted;
-    }
-    throw new Error('unhandled object in getQuoted');
-}
-
 function toList(obj) {
     return assignType(obj, 'malList');
 }
@@ -83,7 +34,13 @@ function str2symbol(str) {
     return {symbol: str};
 }
 
-function isSymbol(obj) {
+function isSymbol(obj, value) {
+    if (obj === undefined || obj === null) {
+        return false;
+    }
+    if (value) {
+        return !!obj.symbol && value === nameOf(obj);
+    }
     return !!obj.symbol;
 }
 
@@ -111,13 +68,7 @@ function isString(obj) {
     return typeof obj === 'string' && !isKeyword(obj);
 }
 
-module.exports = {quoteTypes: quoteTypes,
-                  quoteShortHands: quoteShortHands,
-                  getQuoted: getQuoted,
-                  quotedForm: quotedForm,
-                  isQuoted: isQuoted,
-                  quoteType: quoteType,
-                  toList: toList,
+module.exports = {toList: toList,
                   isList: isList,
                   toVector: toVector,
                   isVector: isVector,
