@@ -1,5 +1,4 @@
 var types = require('./types');
-var keywordMarker = require('./types').keywordMarker;
 
 function pr_seq(x, prefix, postfix, printer) {
     return prefix + x.map(printer).join(' ') + postfix;

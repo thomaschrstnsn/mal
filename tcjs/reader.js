@@ -190,11 +190,7 @@ function read_str(input) {
     var reader = Reader(tokens);
     var result = read_form(reader);
 
-    // if (!reader.is_finished()) {
-    //     console.log('WARNING: string was not fully consumed while reading form, next token:', reader.peek());
-    // }
-
-    return result;
+     return result;
 }
 
 exports.read_str = read_str;
