@@ -148,10 +148,10 @@ function is_pair(x) {
 function quasiquote(qAst) {
     if (!is_pair(qAst)) {
         return types.toList([types.str2symbol('quote'), qAst]);
-    } else if (qAst.length >= 2 && types.isSymbol(qAst[0], 'unquote')){
+    } else if (qAst.length >= 2 && types.isThisSymbol(qAst[0], 'unquote')){
         return qAst[1];
     } else if (qAst.length >= 2 && is_pair(qAst[0]) &&
-               types.isSymbol(qAst[0][0], 'splice-unquote')) {
+               types.isThisSymbol(qAst[0][0], 'splice-unquote')) {
         return types.toList([types.str2symbol('concat'),
                              qAst[0][1],
                              types.toVector(qAst.slice(1))]);

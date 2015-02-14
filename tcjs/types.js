@@ -34,14 +34,18 @@ function str2symbol(str) {
     return {symbol: str};
 }
 
-function isSymbol(obj, value) {
+function isSymbol(obj) {
     if (obj === undefined || obj === null) {
         return false;
     }
-    if (value) {
-        return !!obj.symbol && value === nameOf(obj);
-    }
     return !!obj.symbol;
+}
+
+function isThisSymbol(obj, expSymbol) {
+    if (obj === undefined || obj === null) {
+        return false;
+    }
+    return isSymbol(obj) && expSymbol === nameOf(obj);
 }
 
 var keywordMarker = '\u200B';
@@ -76,6 +80,7 @@ module.exports = {toList: toList,
                   isMap: isMap,
                   str2symbol: str2symbol,
                   isSymbol: isSymbol,
+                  isThisSymbol: isThisSymbol,
                   str2keyword: str2keyword,
                   isKeyword: isKeyword,
                   nameOf: nameOf,
