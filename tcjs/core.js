@@ -161,6 +161,42 @@ function cons(x, xs) {
     return concat([x], xs);
 }
 
+function nth(xs, n) {
+    if (xs === null) return null;
+
+    if (types.isList(xs) || types.isVector(xs)) {
+        if (n < xs.length && n >= 0) {
+            return xs[n];
+        }
+        throw new Error("invalid index as second parameter to nth");
+    }
+
+    throw new Error("non sequence as first parameter to nth");
+}
+
+function first(xs) {
+    if (xs === null) return null;
+
+    if (types.isList(xs) || types.isVector(xs)) {
+        if (empty(xs)) {
+            return null;
+        }
+        return xs[0];
+    }
+
+    throw new Error("non sequence as parameter to first");
+}
+
+function rest(xs) {
+    if (xs === null) return null;
+
+    if (types.isList(xs) || types.isVector(xs)) {
+        return types.toList(xs.slice(1));
+    }
+
+    throw new Error("non sequence as parameter to rest");
+}
+
 module.exports = {'+': plus,
                   '-': minus,
                   '/': slash,
@@ -181,5 +217,9 @@ module.exports = {'+': plus,
                   'read-string': read_string,
                   'slurp': slurp,
                   'cons': cons,
-                  'concat': concat
+                  'concat': concat,
+                  'nth': nth,
+                  'first': first,
+                  'rest': rest,
+                  'throw': function (x) {throw new Error(x)}
                  };

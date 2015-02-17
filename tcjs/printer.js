@@ -46,10 +46,11 @@ function pr_str(x, print_readably) {
         return types.nameOf(x);
     }
     if (typeof x === 'function') {
-        return '#func"'+ x.toString() + '"';
+        return '#native func"'+ x.toString() + '"';
     }
     if (x.fn && x.ast && x.params && x.env) {
-        return '#func"'+ x.fn.toString() + '"';
+        var type = types.isMacro(x) ? 'macro' : 'func';
+        return '#' + type + '"(fn* (' + x.params.join(" ") + ') '+ pr_str(x.ast) + ')"';
     }
 
     console.log("do not know how to print:", x);

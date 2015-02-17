@@ -30,6 +30,14 @@ function isMap(obj) {
     return !!obj.malMap;
 }
 
+function toMacro(obj) {
+    return assignType(obj, 'malMacro');
+}
+
+function isMacro(obj) {
+    return !!obj.malMacro;
+}
+
 function str2symbol(str) {
     return {symbol: str};
 }
@@ -78,6 +86,8 @@ module.exports = {toList: toList,
                   isVector: isVector,
                   toMap: toMap,
                   isMap: isMap,
+                  toMacro: toMacro,
+                  isMacro: isMacro,
                   str2symbol: str2symbol,
                   isSymbol: isSymbol,
                   isThisSymbol: isThisSymbol,
