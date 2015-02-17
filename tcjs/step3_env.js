@@ -59,9 +59,9 @@ function let_form(ast, env) {
     }
 
     var letEnv = Env(env);
-    while (bindings.length > 0) {
-        var sym = bindings.shift();
-        var unevalVal = bindings.shift();
+    for (var i = 0; i < bindings.length; i++) {
+        var sym = bindings[i++];
+        var unevalVal = bindings[i];
 
         if (!types.isSymbol(sym)) {
             throw new Error('expected even element in bindings to let form to be symbol');
