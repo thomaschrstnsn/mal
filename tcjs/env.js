@@ -1,5 +1,6 @@
 var types = require('./types');
 var _ = require('lodash');
+var logger = require('./logger');
 
 function Env(outer, binds, exprs) {
     var data = {};
@@ -28,8 +29,8 @@ function Env(outer, binds, exprs) {
         if (found !== undefined) {
             return found;
         }
-        console.log('unable to get:', key, 'in:', data);
-        throw new Error('could not find key: ' + key);
+        logger.debug('unable to get:', key, 'in:', data);
+        throw new Error('could not find key: ' + key + ' in environment');
     };
 
     api.keys = function() {

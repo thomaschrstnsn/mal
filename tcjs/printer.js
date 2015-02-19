@@ -1,4 +1,5 @@
 var types = require('./types');
+var logger = require('./logger');
 
 function pr_seq(x, prefix, postfix, printer) {
     return prefix + x.map(printer).join(' ') + postfix;
@@ -53,7 +54,7 @@ function pr_str(x, print_readably) {
         return '#' + type + '"(fn* (' + x.params.join(" ") + ') '+ pr_str(x.ast) + ')"';
     }
 
-    console.log("do not know how to print:", x);
+    logger.debug("do not know how to print:", x);
     throw new Error("Unhandled thing");
 }
 

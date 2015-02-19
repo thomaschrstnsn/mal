@@ -1,9 +1,10 @@
 var _ = require('lodash');
 
-var reader = require('./reader.js'),
+var reader = require('./reader'),
     read_str = reader.read_str;
 var types = require('./types');
-var pr_str = require('./printer.js').pr_str;
+var pr_str = require('./printer').pr_str;
+var logger = require('./logger');
 
 function READ(a) {
     return read_str(a);
@@ -252,7 +253,7 @@ function EVAL(ast, env) {
                 env = Env(func.env, func.params, evaled.slice(1));
                 continue;
             }
-            console.log('found func:', func);
+            logger.debug('found func:', func);
             throw new Error('expected callable thing as first thing in list being evaled');
         }
 
@@ -294,16 +295,16 @@ rep("(defmacro! cond (fn* (& xs) (if (> (count xs) 0) (list 'if (first xs) (if (
 rep("(defmacro! or (fn* (& xs) (if (empty? xs) nil (if (= 1 (count xs)) (first xs) `(let* (or_FIXME ~(first xs)) (if or_FIXME or_FIXME (or ~@(rest xs))))))))");
 
 function DEBUG_rep(a) {
-    console.log('env: ', repl_env.keys());
+    logger.debug('env: ', repl_env.keys());
 
     var r = READ(a);
-    console.log("read:  ", r);
+    logger.debug("read:  ", r);
 
     var e = EVAL(r, repl_env);
-    console.log("eval:  ", e);
+    logger.debug("eval:  ", e);
 
     var p = PRINT(e);
-    console.log("print: ", p);
+    logger.debug("print: ", p);
 
     return p;
 }
@@ -314,7 +315,7 @@ types.toList(malArgv);
 repl_env.set('*ARGV*', malArgv);
 
 function repl() {
-    var readline = require('./node_readline.js');
+    var readline = require('./node_readline');
     // repl loop
     if (typeof require !== 'undefined' && require.main === module) {
         // Synchronous node.js commandline mode
@@ -325,15 +326,15 @@ function repl() {
                 if (line) { console.log(rep(line)); }
             } catch (exc) {
                 if (exc instanceof reader.BlankException) { continue; }
-                if (exc.stack) { console.log(exc.stack); }
-                else           { console.log(exc); }
+                logger.exception(exc);
             }
         }
     }
 }
 
 if (process.argv[2] === 'debug') {
-    console.log("debugging REPL");
+    logger.setLevel('DEBUG');
+    logger.debug("debugging REPL");
     rep = DEBUG_rep;
     repl();
 } else if (process.argv.length > 2) {

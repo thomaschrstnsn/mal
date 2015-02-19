@@ -1,7 +1,8 @@
-var reader = require('./reader.js'),
+var reader = require('./reader'),
     read_str = reader.read_str;
 
 var types = require('./types');
+var logger = require('./logger');
 
 function READ(a) {
     return read_str(a);
@@ -94,7 +95,7 @@ function EVAL(ast, env) {
     return eval_ast(ast, env);
 }
 
-var pr_str = require('./printer.js').pr_str;
+var pr_str = require('./printer').pr_str;
 
 function PRINT(a) {
     return pr_str(a);
@@ -115,24 +116,25 @@ function rep(a) {
 }
 
 function DEBUG_rep(a) {
-    console.log('env: ', repl_env.keys());
+    logger.debug('env: ', repl_env.keys());
 
     var r = READ(a);
-    console.log("read:  ", r);
+    logger.debug("read:  ", r);
 
     var e = EVAL(r, repl_env);
-    console.log("eval:  ", e);
+    logger.debug("eval:  ", e);
 
     var p = PRINT(e);
-    console.log("print: ", p);
+    logger.debug("print: ", p);
 
     return p;
 }
 
-var readline = require('./node_readline.js');
+var readline = require('./node_readline');
 
 if (process.argv[2] === 'debug') {
-    console.log("debugging REPL");
+    logger.setLevel('DEBUG');
+    logger.debug("debugging REPL");
     rep = DEBUG_rep;
 }
 
@@ -146,8 +148,7 @@ if (typeof require !== 'undefined' && require.main === module) {
             if (line) { console.log(rep(line)); }
         } catch (exc) {
             if (exc instanceof reader.BlankException) { continue; }
-            if (exc.stack) { console.log(exc.stack); }
-            else           { console.log(exc); }
+            logger.exception(exc);
         }
     }
 }
