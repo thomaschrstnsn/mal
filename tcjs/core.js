@@ -40,10 +40,61 @@ function star() {
     return reduceFunc(multiply, arguments);
 }
 
+function nilQ(x) {
+    return x === null;
+}
+
+function trueQ(x) {
+    return x === true;
+}
+
+function falseQ(x) {
+    return x === false;
+}
+
 function list() {
     var l = _.values(arguments);
-    types.toList(l);
-    return l;
+    return types.toList(l);
+}
+
+function vector() {
+    var v = _.values(arguments);
+    return types.toVector(v);
+}
+
+function hash_map() {
+    var map = {};
+    _.chain(arguments)
+        .values()
+        .chunk(2)
+        .forEach(function(pair) {
+            var key = pair[0];
+            var val = pair[1];
+
+            if (val === undefined) {
+                throw new Error('missing value in hash-map');
+            }
+            if (typeof (key) !== 'string') {
+                throw new Error('expected key to be string or keyword');
+            }
+            map[key] = val;
+        })
+        .value();
+    return types.toMap(map);
+}
+
+function keys(x) {
+    if (!types.isMap(x)) {
+        throw new Error("keys called on non-map");
+    }
+    return types.toList(_.keys(x));
+}
+
+function vals(x) {
+    if (!types.isMap(x)) {
+        throw new Error("vals called on non-map");
+    }
+    return types.toList(_.values(x));
 }
 
 function empty(x) {
@@ -157,6 +208,10 @@ function concat() {
     return res;
 }
 
+function sequentialQ(x) {
+    return types.isList(x) || types.isVector(x);
+}
+
 function cons(x, xs) {
     return concat([x], xs);
 }
@@ -201,8 +256,21 @@ module.exports = {'+': plus,
                   '-': minus,
                   '/': slash,
                   '*': star,
+                  'nil?': nilQ,
+                  'true?': trueQ,
+                  'false?': falseQ,
+                  'symbol': types.str2symbol,
+                  'symbol?': types.isSymbol,
+                  'keyword': types.str2keyword,
+                  'keyword?': types.isKeyword,
                   'list': list,
                   'list?': types.isList,
+                  'hash-map': hash_map,
+                  'map?': types.isMap,
+                  'vector': vector,
+                  'vector?': types.isVector,
+                  'vals': vals,
+                  'keys': keys,
                   'empty?': empty,
                   'count': count,
                   '=': eq,
@@ -216,10 +284,10 @@ module.exports = {'+': plus,
                   'println': println,
                   'read-string': read_string,
                   'slurp': slurp,
+                  'sequential?': sequentialQ,
                   'cons': cons,
                   'concat': concat,
                   'nth': nth,
                   'first': first,
-                  'rest': rest,
-                  'throw': function (x) {throw new Error(x)}
+                  'rest': rest
                  };
