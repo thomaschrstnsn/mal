@@ -83,6 +83,41 @@ function hash_map() {
     return types.toMap(map);
 }
 
+function assoc(map, key, val) {
+    if (!types.isMap(map)) {
+        throw new Error("assoc expected map as first argument");
+    }
+
+    var c = _.clone(map);
+
+    if (typeof key !== 'string') {
+        throw new Error("only string/keyword keys are allowed on maps");
+    }
+    c[key] = val;
+
+    return types.toMap(c);
+}
+
+function dissoc() {
+    var map = arguments[0];
+    var keys = _.chain(arguments).values().rest().value();
+
+    if (!types.isMap(map)) {
+        throw new Error("dissoc expected map as first argument");
+    }
+
+    if (!_.every(keys, function(x) {return typeof x === 'string';})) {
+        throw new Error("only string/keyword keys are allowed in maps");
+    }
+
+    var c = _.clone(map);
+
+    for (var i = 0; i < keys.length; i++) {
+        delete c[keys[i]];
+    }
+    return types.toMap(c);
+}
+
 function keys(x) {
     if (!types.isMap(x)) {
         throw new Error("keys called on non-map");
@@ -332,6 +367,8 @@ module.exports = {'+': plus,
                   'list?': types.isList,
                   'hash-map': hash_map,
                   'map?': types.isMap,
+                  'assoc': assoc,
+                  'dissoc': dissoc,
                   'vector': vector,
                   'vector?': types.isVector,
                   'vals': vals,
