@@ -212,6 +212,21 @@ function sequentialQ(x) {
     return types.isList(x) || types.isVector(x);
 }
 
+function apply() {
+    var f = arguments[0];
+
+    var argVals = _.chain(arguments).values();
+
+    var numNonSeqArgs = arguments.length - 2;
+    var nonSeqArgs = argVals.rest().take(numNonSeqArgs);
+
+    var seqArgs = argVals.last().value();
+
+    var args = nonSeqArgs.concat(seqArgs).value();
+
+    return f.apply(undefined, args);
+}
+
 function cons(x, xs) {
     return concat([x], xs);
 }
@@ -285,6 +300,7 @@ module.exports = {'+': plus,
                   'read-string': read_string,
                   'slurp': slurp,
                   'sequential?': sequentialQ,
+                  'apply': apply,
                   'cons': cons,
                   'concat': concat,
                   'nth': nth,
