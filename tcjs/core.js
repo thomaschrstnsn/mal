@@ -286,6 +286,8 @@ function apply() {
 function map() {
     var f = arguments[0];
 
+    var func = typeof f === 'function' ? f : f.fn;
+
     var cols = _.chain(arguments).values().rest().value();
 
     if (!_.every(cols, sequentialQ)){
@@ -301,7 +303,8 @@ function map() {
         };
 
         var args = _.map(cols, at);
-        var val = f.apply(undefined, args);
+
+        var val = func.apply(undefined, args);
         res.push(val);
     }
 
