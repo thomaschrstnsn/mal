@@ -118,6 +118,27 @@ function dissoc() {
     return types.toMap(c);
 }
 
+function get(map, key, notFound) {
+    if (!types.isMap(map)) {
+        throw new Error("get expected map as first argument");
+    }
+
+    if (typeof key !== 'string') {
+        throw new Error("only string/keyword keys allowed in maps");
+    }
+
+    if (map.hasOwnProperty(key)) {
+        return map[key];
+    }
+
+    return notFound === undefined ? null : notFound;
+}
+
+function containsQ(map, key) {
+    var notFound = {notFound: key};
+    return get(map, key, notFound) !== notFound;
+}
+
 function keys(x) {
     if (!types.isMap(x)) {
         throw new Error("keys called on non-map");
@@ -369,6 +390,8 @@ module.exports = {'+': plus,
                   'map?': types.isMap,
                   'assoc': assoc,
                   'dissoc': dissoc,
+                  'get': get,
+                  'contains?': containsQ,
                   'vector': vector,
                   'vector?': types.isVector,
                   'vals': vals,
