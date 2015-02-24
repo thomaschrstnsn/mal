@@ -227,6 +227,56 @@ function apply() {
     return f.apply(undefined, args);
 }
 
+function map() {
+    var f = arguments[0];
+
+    var cols = _.chain(arguments).values().rest().value();
+
+    if (!_.every(cols, sequentialQ)){
+        throw new Error("non-sequence as collection in map");
+    }
+
+    var length = _.chain(cols).map(count).min().value();
+
+    var res = [];
+    for (var i = 0; i < length; i++) {
+        function at(s) {
+            return s[i];
+        };
+
+        var args = _.map(cols, at);
+        var val = f.apply(undefined, args);
+        res.push(val);
+    }
+
+    return types.toList(res);
+}
+
+function range() {
+    var start = 0;
+    var end = 0;
+    var step = 1;
+
+    switch (arguments.length) {
+    case 0: throw new Error("range needs atleast one argument");
+    default: throw new Error("range takes at most three arguments");
+    case 3:
+        step  = arguments[2];
+        end   = arguments[1];
+        start = arguments[0];
+        break;
+    case 2:
+        start = arguments[0];
+        end   = arguments[1];
+        break;
+    case 1:
+        end = arguments[0];
+        break;
+    }
+
+    return types.toList(_.range(start, end, step));
+}
+
 function cons(x, xs) {
     return concat([x], xs);
 }
@@ -301,6 +351,8 @@ module.exports = {'+': plus,
                   'slurp': slurp,
                   'sequential?': sequentialQ,
                   'apply': apply,
+                  'map': map,
+                  'range': range,
                   'cons': cons,
                   'concat': concat,
                   'nth': nth,
