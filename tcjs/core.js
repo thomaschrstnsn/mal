@@ -265,7 +265,7 @@ function concat() {
 }
 
 function sequentialQ(x) {
-    return types.isList(x) || types.isVector(x);
+    return x !== null && (types.isList(x) || types.isVector(x));
 }
 
 function apply() {
