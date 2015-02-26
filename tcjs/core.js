@@ -119,6 +119,10 @@ function dissoc() {
 }
 
 function get(map, key, notFound) {
+    if (map === null) {
+        return null;
+    }
+
     if (!types.isMap(map)) {
         throw new Error("get expected map as first argument");
     }
