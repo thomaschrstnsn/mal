@@ -336,9 +336,9 @@ function conj() {
     var xs = _.chain(arguments).values().rest().value();
 
     if (types.isVector(coll)) {
-        return types.toVector(xs.concat(coll));
+        return types.toVector(coll.concat(xs));
     }
-    return types.toList(coll.concat(xs));
+    return types.toList(_(xs).reverse().concat(coll).value());
 }
 
 function range() {
