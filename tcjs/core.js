@@ -83,17 +83,29 @@ function hash_map() {
     return types.toMap(map);
 }
 
-function assoc(map, key, val) {
+function assoc() {
+    var map = arguments[0];
     if (!types.isMap(map)) {
         throw new Error("assoc expected map as first argument");
     }
 
+    var keyValues = _.chain(arguments).values().rest().value();
+
+    if ((keyValues.length % 2 !== 0)) {
+        throw new Error("expected keys and values to have same count");
+    }
+
     var c = _.clone(map);
 
-    if (typeof key !== 'string') {
-        throw new Error("only string/keyword keys are allowed on maps");
+    for (var i = 0; i < keyValues.length; i++) {
+        var key = keyValues[i++];
+        var val = keyValues[i];
+
+        if (typeof key !== 'string') {
+            throw new Error("only string/keyword keys are allowed on maps");
+        }
+        c[key] = val;
     }
-    c[key] = val;
 
     return types.toMap(c);
 }
