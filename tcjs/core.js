@@ -327,6 +327,20 @@ function map() {
     return types.toList(res);
 }
 
+function conj() {
+    var coll = arguments[0] || types.toList([]);
+    if (!sequentialQ(coll)) {
+        throw new Error("expected sequential as first argument to conj");
+    }
+
+    var xs = _.chain(arguments).values().rest().value();
+
+    if (types.isVector(coll)) {
+        return types.toVector(xs.concat(coll));
+    }
+    return types.toList(coll.concat(xs));
+}
+
 function range() {
     var start = 0;
     var end = 0;
@@ -431,6 +445,7 @@ module.exports = {'+': plus,
                   'sequential?': sequentialQ,
                   'apply': apply,
                   'map': map,
+                  'conj': conj,
                   'range': range,
                   'cons': cons,
                   'concat': concat,
