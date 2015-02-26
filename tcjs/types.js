@@ -1,41 +1,74 @@
-function assignType(obj, type, value) {
-    return Object.defineProperty(obj, type,
-                                 {enumerable: false,
-                                  writable: false,
-                                  configurable: false,
-                                  value: value || true});
+var _ = require('lodash');
+
+var TYPE_KEY = '__malType';
+var META_KEY = '__malMeta';
+
+var LIST_TYPE = 'malList';
+var VECTOR_TYPE = 'malVector';
+var MAP_TYPE = 'malMap';
+var MACRO_TYPE = 'malMacro';
+
+function staticPropDef(value) {
+    return {enumerable: false,
+            writable: false,
+            configurable: false,
+            value: value};
+}
+
+function getType(obj) {
+    return obj[TYPE_KEY];
+}
+
+function assignType(obj, type) {
+    return Object.defineProperty(obj, TYPE_KEY, staticPropDef(type));
+}
+
+function getMeta(obj) {
+    return obj[META_KEY];
+}
+
+function assignMeta(obj, meta) {
+    return Object.defineProperty(obj, META_KEY, staticPropDef(meta));
+}
+
+function withMeta(obj, meta) {
+    return assignMeta(clone(obj), meta);
+}
+
+function clone(obj) {
+    return assignType(_.clone(obj), getType(obj));
 }
 
 function toList(obj) {
-    return assignType(obj, 'malList');
+    return assignType(obj, LIST_TYPE);
 }
 
 function isList(obj) {
-    return !!obj.malList;
+    return getType(obj) === LIST_TYPE;
 }
 
 function toVector(obj) {
-    return assignType(obj, 'malVector');
+    return assignType(obj, VECTOR_TYPE);
 }
 
 function isVector(obj) {
-    return !!obj.malVector;
+    return getType(obj) === VECTOR_TYPE;
 }
 
 function toMap(obj) {
-    return assignType(obj, 'malMap');
+    return assignType(obj, MAP_TYPE);
 }
 
 function isMap(obj) {
-    return !!obj.malMap;
+    return getType(obj) === MAP_TYPE;
 }
 
 function toMacro(obj) {
-    return assignType(obj, 'malMacro');
+    return assignType(obj, MACRO_TYPE);
 }
 
 function isMacro(obj) {
-    return !!obj.malMacro;
+    return getType(obj) === MACRO_TYPE;
 }
 
 function str2symbol(str) {
@@ -80,7 +113,10 @@ function isString(obj) {
     return typeof obj === 'string' && !isKeyword(obj);
 }
 
-module.exports = {toList: toList,
+module.exports = {withMeta: withMeta,
+                  getMeta: getMeta,
+                  clone: clone,
+                  toList: toList,
                   isList: isList,
                   toVector: toVector,
                   isVector: isVector,

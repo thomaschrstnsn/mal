@@ -61,6 +61,15 @@ function read_string(r) {
     return unescape_string(s.substr(1, s.length - 2));
 }
 
+function read_meta(r) {
+    r.next();
+
+    var m = read_form(r);
+    var o = read_form(r);
+
+    return types.toList([types.str2symbol("with-meta"), o, m]);
+}
+
 function read_keyword(r) {
     var kw = r.next().substr(1);
 
@@ -174,6 +183,7 @@ function read_form(r) {
     switch (r.peek()[0]) {
     case ':': return read_keyword(r);
     case '"': return read_string(r);
+    case "^": return read_meta(r);
     case ';': return null;
     }
 

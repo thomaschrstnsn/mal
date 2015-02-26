@@ -95,7 +95,7 @@ function assoc() {
         throw new Error("expected keys and values to have same count");
     }
 
-    var c = _.clone(map);
+    var c = types.clone(map);
 
     for (var i = 0; i < keyValues.length; i++) {
         var key = keyValues[i++];
@@ -107,7 +107,7 @@ function assoc() {
         c[key] = val;
     }
 
-    return types.toMap(c);
+    return c;
 }
 
 function dissoc() {
@@ -122,12 +122,12 @@ function dissoc() {
         throw new Error("only string/keyword keys are allowed in maps");
     }
 
-    var c = _.clone(map);
+    var c = types.clone(map);
 
     for (var i = 0; i < keys.length; i++) {
         delete c[keys[i]];
     }
-    return types.toMap(c);
+    return c;
 }
 
 function get(map, key, notFound) {
@@ -406,6 +406,11 @@ function rest(xs) {
     throw new Error("non sequence as parameter to rest");
 }
 
+function meta(obj) {
+    var m = types.getMeta(obj);
+    return m !== undefined ? m : null;
+}
+
 module.exports = {'+': plus,
                   '-': minus,
                   '/': slash,
@@ -451,5 +456,7 @@ module.exports = {'+': plus,
                   'concat': concat,
                   'nth': nth,
                   'first': first,
-                  'rest': rest
+                  'rest': rest,
+                  'with-meta': types.withMeta,
+                  'meta': meta
                  };
