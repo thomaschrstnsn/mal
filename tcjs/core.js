@@ -264,6 +264,11 @@ function read_string(s) {
     return read_str(s);
 }
 
+var readline = require('./node_readline');
+function read_line(s) {
+    return readline.readline(s);
+}
+
 var fs = require('fs');
 
 function slurp(filename) {
@@ -467,6 +472,7 @@ module.exports = {'+': plus,
                   'prn': prn,
                   'println': println,
                   'read-string': read_string,
+                  'readline': read_line,
                   'slurp': slurp,
                   'sequential?': sequentialQ,
                   'apply': apply,
