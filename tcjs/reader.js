@@ -70,6 +70,14 @@ function read_meta(r) {
     return types.toList([types.str2symbol("with-meta"), o, m]);
 }
 
+function read_deref(r) {
+    r.next();
+
+    var a = read_form(r);
+
+    return types.toList([types.str2symbol("deref"), a]);
+}
+
 function read_keyword(r) {
     var kw = r.next().substr(1);
 
@@ -184,6 +192,7 @@ function read_form(r) {
     case ':': return read_keyword(r);
     case '"': return read_string(r);
     case "^": return read_meta(r);
+    case "@": return read_deref(r);
     case ';': return null;
     }
 

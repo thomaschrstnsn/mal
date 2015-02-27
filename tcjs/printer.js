@@ -46,6 +46,9 @@ function pr_str(x, print_readably) {
     if (types.isSymbol(x)) {
         return types.nameOf(x);
     }
+    if (types.isAtom(x)) {
+        return "(atom " + printer(types.valueOfAtom(x)) + ")";
+    }
     if (typeof x === 'function') {
         return '#native func"'+ x.toString() + '"';
     }

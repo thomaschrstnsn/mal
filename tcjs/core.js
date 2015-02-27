@@ -285,7 +285,7 @@ function sequentialQ(x) {
 }
 
 function apply() {
-    var f = arguments[0];
+    var f = fnOf(arguments[0]);
 
     var argVals = _.chain(arguments).values();
 
@@ -299,10 +299,12 @@ function apply() {
     return f.apply(undefined, args);
 }
 
-function map() {
-    var f = arguments[0];
+function fnOf(f) {
+    return typeof f === 'function' ? f : f.fn;
+}
 
-    var func = typeof f === 'function' ? f : f.fn;
+function map() {
+    var f = fnOf(arguments[0]);
 
     var cols = _.chain(arguments).values().rest().value();
 
@@ -320,7 +322,7 @@ function map() {
 
         var args = _.map(cols, at);
 
-        var val = func.apply(undefined, args);
+        var val = f.apply(undefined, args);
         res.push(val);
     }
 
@@ -411,6 +413,25 @@ function meta(obj) {
     return m !== undefined ? m : null;
 }
 
+function deref(atom) {
+    return types.valueOfAtom(atom);
+}
+
+function resetXCL(atom, newVal) {
+    types.setAtom(atom, newVal);
+    return newVal;
+}
+
+function swapXCL() {
+    var atom = arguments[0];
+    var f = arguments[1];
+
+    var extraArgs = _.chain(arguments).values().rest().rest().value();
+
+    var newVal = apply(f, types.valueOfAtom(atom), extraArgs);
+    return resetXCL(atom, newVal);
+}
+
 module.exports = {'+': plus,
                   '-': minus,
                   '/': slash,
@@ -458,5 +479,10 @@ module.exports = {'+': plus,
                   'first': first,
                   'rest': rest,
                   'with-meta': types.withMeta,
-                  'meta': meta
+                  'meta': meta,
+                  'atom': types.wrapInAtom,
+                  'atom?': types.isAtom,
+                  'deref': deref,
+                  'reset!': resetXCL,
+                  'swap!': swapXCL
                  };

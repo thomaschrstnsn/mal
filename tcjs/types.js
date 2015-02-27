@@ -7,6 +7,7 @@ var LIST_TYPE = 'malList';
 var VECTOR_TYPE = 'malVector';
 var MAP_TYPE = 'malMap';
 var MACRO_TYPE = 'malMacro';
+var ATOM_TYPE = 'malAtom';
 
 function staticPropDef(value) {
     return {enumerable: false,
@@ -113,6 +114,28 @@ function isString(obj) {
     return typeof obj === 'string' && !isKeyword(obj);
 }
 
+function wrapInAtom(obj) {
+    return assignType({atomValue: obj}, ATOM_TYPE);
+}
+
+function isAtom(obj) {
+    return getType(obj) === ATOM_TYPE;
+}
+
+function valueOfAtom(obj) {
+    if (!isAtom(obj)) {
+        throw new Error("derefing non atom");
+    }
+    return obj.atomValue;
+}
+
+function setAtom(atom, newValue) {
+    if (!isAtom(atom)) {
+        throw new Error("expected atom");
+    }
+    atom.atomValue = newValue;
+}
+
 module.exports = {withMeta: withMeta,
                   getMeta: getMeta,
                   clone: clone,
@@ -130,5 +153,9 @@ module.exports = {withMeta: withMeta,
                   str2keyword: str2keyword,
                   isKeyword: isKeyword,
                   nameOf: nameOf,
-                  isString: isString
+                  isString: isString,
+                  wrapInAtom: wrapInAtom,
+                  valueOfAtom: valueOfAtom,
+                  isAtom: isAtom,
+                  setAtom: setAtom
                  };
