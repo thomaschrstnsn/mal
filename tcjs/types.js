@@ -136,6 +136,18 @@ function setAtom(atom, newValue) {
     atom.atomValue = newValue;
 }
 
+function toError(val) {
+    return {malError: val};
+}
+
+function isError(obj) {
+    return obj.malError !== undefined;
+}
+
+function valueOfError(obj) {
+    return obj.malError;
+}
+
 module.exports = {withMeta: withMeta,
                   getMeta: getMeta,
                   clone: clone,
@@ -157,5 +169,8 @@ module.exports = {withMeta: withMeta,
                   wrapInAtom: wrapInAtom,
                   valueOfAtom: valueOfAtom,
                   isAtom: isAtom,
-                  setAtom: setAtom
+                  setAtom: setAtom,
+                  toError: toError,
+                  isError: isError,
+                  valueOfError: valueOfError
                  };

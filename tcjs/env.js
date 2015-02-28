@@ -30,7 +30,7 @@ function Env(outer, binds, exprs) {
             return found;
         }
         logger.debug('unable to get:', key, 'in:', data);
-        throw new Error('could not find key: ' + key + ' in environment');
+        throw new Error("'" + key + "' not found");
     };
 
     api.keys = function() {

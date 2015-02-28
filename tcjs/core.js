@@ -437,6 +437,10 @@ function swapXCL() {
     return resetXCL(atom, newVal);
 }
 
+function _throw(obj) {
+    throw types.toError(obj);
+}
+
 module.exports = {'+': plus,
                   '-': minus,
                   '/': slash,
@@ -490,5 +494,6 @@ module.exports = {'+': plus,
                   'atom?': types.isAtom,
                   'deref': deref,
                   'reset!': resetXCL,
-                  'swap!': swapXCL
+                  'swap!': swapXCL,
+                  'throw': _throw
                  };
