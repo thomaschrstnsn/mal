@@ -1,5 +1,5 @@
 module Readline
-  ( Repl(..)
+  ( Repl
   , repl
   ) where
 
@@ -12,7 +12,7 @@ ini :: Repl ()
 ini = liftIO $ putStrLn "Welcome!"
 
 completer :: Monad m => WordCompleter m
-completer n = return []
+completer _ = return []
 
 repl :: (String -> Repl ()) -> IO ()
 repl rep = evalRepl "user> " rep [] (Word completer) ini
