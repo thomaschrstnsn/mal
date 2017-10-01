@@ -37,7 +37,7 @@ def is_macro_call(ast, env):
 def macroexpand(ast, env):
     while is_macro_call(ast, env):
         mac = env.get(ast[0])
-        ast = macroexpand(mac(*ast[1:]), env)
+        ast = mac(*ast[1:])
     return ast
 
 def eval_ast(ast, env):
@@ -64,7 +64,8 @@ def EVAL(ast, env):
 
         # apply list
         ast = macroexpand(ast, env)
-        if not types._list_Q(ast): return ast
+        if not types._list_Q(ast):
+            return eval_ast(ast, env)
         if len(ast) == 0: return ast
         a0 = ast[0]
 

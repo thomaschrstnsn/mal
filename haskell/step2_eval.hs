@@ -1,6 +1,6 @@
 import System.IO (hFlush, stdout)
 import Control.Monad (mapM)
-import Control.Monad.Error (runErrorT)
+import Control.Monad.Except (runExceptT)
 import qualified Data.Map as Map
 import qualified Data.Traversable as DT
 
@@ -31,6 +31,8 @@ eval_ast ast@(MalHashMap lst m) env = do
 eval_ast ast env = return ast
 
 apply_ast :: MalVal -> (Map.Map String MalVal) -> IOThrows MalVal
+apply_ast ast@(MalList [] _) env = do
+    return ast
 apply_ast ast@(MalList _ _) env = do
     el <- eval_ast ast env
     case el of
@@ -79,7 +81,7 @@ repl_loop = do
         Nothing -> return ()
         Just "" -> repl_loop
         Just str -> do
-            res <- runErrorT $ rep str
+            res <- runExceptT $ rep str
             out <- case res of
                 Left (StringError str) -> return $ "Error: " ++ str
                 Left (MalValError mv) -> return $ "Error: " ++ (show mv)

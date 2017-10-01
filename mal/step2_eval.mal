@@ -7,8 +7,8 @@
 (def! eval-ast (fn* [ast env] (do
   ;;(do (prn "eval-ast" ast "/" (keys env)) )
   (cond
-    (symbol? ast) (or (get env (str ast))
-                      (throw (str ast " not found")))
+    (symbol? ast) (let* [res (get env (str ast))]
+                    (if res res (throw (str ast " not found"))))
 
     (list? ast)   (map (fn* [exp] (EVAL exp env)) ast)
 
@@ -28,10 +28,12 @@
     (eval-ast ast env)
 
     ;; apply list
-    (let* [el (eval-ast ast env)
-          f (first el)
-          args (rest el)]
-      (apply f args))))))
+    (if (empty? ast)
+      ast
+      (let* [el (eval-ast ast env)
+            f (first el)
+            args (rest el)]
+        (apply f args)))))))
 
 
 ;; print

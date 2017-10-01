@@ -80,7 +80,12 @@ function MAL_EVAL($ast, $env) {
 
     // apply list
     $ast = macroexpand($ast, $env);
-    if (!_list_Q($ast)) { return $ast; }
+    if (!_list_Q($ast)) {
+        return eval_ast($ast, $env);
+    }
+    if ($ast->count() === 0) {
+        return $ast;
+    }
 
     $a0 = $ast[0];
     $a0v = (_symbol_Q($a0) ? $a0->value : $a0);
@@ -114,7 +119,7 @@ function MAL_EVAL($ast, $env) {
         if ($a2[0]->value === "catch*") {
             try {
                 return MAL_EVAL($a1, $env);
-            } catch (Error $e) {
+            } catch (_Error $e) {
                 $catch_env = new Env($env, array($a2[1]),
                                             array($e->obj));
                 return MAL_EVAL($a2[2], $catch_env);
@@ -160,7 +165,7 @@ function MAL_EVAL($ast, $env) {
 
 // print
 function MAL_PRINT($exp) {
-    return _pr_str($exp, True) . "\n";
+    return _pr_str($exp, True);
 }
 
 // repl
@@ -200,7 +205,7 @@ do {
         $line = mal_readline("user> ");
         if ($line === NULL) { break; }
         if ($line !== "") {
-            print(rep($line));
+            print(rep($line) . "\n");
         }
     } catch (BlankException $e) {
         continue;

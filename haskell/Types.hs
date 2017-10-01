@@ -2,14 +2,14 @@ module Types
 (MalVal (..), MalError (..), IOThrows (..), Fn (..), EnvData (..), Env,
  throwStr, throwMalVal, _get_call, _to_list,
  _func, _malfunc,
- _nil_Q, _true_Q, _false_Q, _symbol_Q, _keyword_Q,
+ _nil_Q, _true_Q, _false_Q, _string_Q, _symbol_Q, _keyword_Q,
  _list_Q, _vector_Q, _hash_map_Q, _atom_Q)
 where
 
 import Data.IORef (IORef)
 import qualified Data.Map as Map
 import Control.Exception as CE
-import Control.Monad.Error (ErrorT, Error, noMsg, strMsg, throwError)
+import Control.Monad.Except
 
 
 -- Base Mal types --
@@ -41,6 +41,7 @@ _equal_Q (MalSymbol a) (MalSymbol b) = a == b
 _equal_Q (MalList a _) (MalList b _) = a == b
 _equal_Q (MalList a _) (MalVector b _) = a == b
 _equal_Q (MalVector a _) (MalList b _) = a == b
+_equal_Q (MalVector a _) (MalVector b _) = a == b
 _equal_Q (MalHashMap a _) (MalHashMap b _) = a == b
 _equal_Q (MalAtom a _) (MalAtom b _) = a == b
 _equal_Q _ _ = False
@@ -54,13 +55,11 @@ instance Eq MalVal where
 data MalError = StringError String
               | MalValError MalVal
 
-type IOThrows = ErrorT MalError IO
+type IOThrows = ExceptT MalError IO
 
-instance Error MalError where
-    noMsg = StringError "An error has occurred"
-    strMsg = StringError
-
+throwStr :: String -> IOThrows a
 throwStr str = throwError $ StringError str
+throwMalVal :: MalVal -> IOThrows a
 throwMalVal mv = throwError $ MalValError mv
 
 -- Env types --
@@ -111,6 +110,10 @@ _false_Q _        = MalFalse
 
 _symbol_Q (MalSymbol _) = MalTrue
 _symbol_Q _             = MalFalse
+
+_string_Q (MalString ('\x029e':_)) = MalFalse
+_string_Q (MalString _)            = MalTrue
+_string_Q _                        = MalFalse
 
 _keyword_Q (MalString ('\x029e':_)) = MalTrue
 _keyword_Q _                        = MalFalse

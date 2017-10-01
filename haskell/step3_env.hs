@@ -1,6 +1,6 @@
 import System.IO (hFlush, stdout)
 import Control.Monad (mapM)
-import Control.Monad.Error (runErrorT)
+import Control.Monad.Except (runExceptT)
 import Control.Monad.Trans (liftIO)
 import qualified Data.Map as Map
 import qualified Data.Traversable as DT
@@ -37,6 +37,8 @@ let_bind env (b:e:xs) = do
     let_bind env xs
 
 apply_ast :: MalVal -> Env -> IOThrows MalVal
+apply_ast ast@(MalList [] _) env = do
+    return ast
 apply_ast ast@(MalList (MalSymbol "def!" : args) _) env = do
     case args of
          (a1@(MalSymbol _): a2 : []) -> do
@@ -93,7 +95,7 @@ repl_loop env = do
         Nothing -> return ()
         Just "" -> repl_loop env
         Just str -> do
-            res <- runErrorT $ rep env str
+            res <- runExceptT $ rep env str
             out <- case res of
                 Left (StringError str) -> return $ "Error: " ++ str
                 Left (MalValError mv) -> return $ "Error: " ++ (show mv)

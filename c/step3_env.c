@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <unistd.h>
 
 #include "types.h"
@@ -23,7 +24,7 @@ MalVal *READ(char prompt[], char *str) {
         }
     }
     ast = read_str(line);
-    if (!str) { free(line); }
+    if (!str) { MAL_GC_FREE(line); }
     return ast;
 }
 
@@ -79,6 +80,7 @@ MalVal *EVAL(MalVal *ast, Env *env) {
         MalVal *a1 = _nth(ast, 1),
                *a2 = _nth(ast, 2);
         MalVal *res = EVAL(a2, env);
+        if (mal_error) return NULL;
         env_set(env, a1, res);
         return res;
     } else if (strcmp("let*", a0->val.string) == 0) {
@@ -135,13 +137,13 @@ MalVal *RE(Env *env, char *prompt, char *str) {
 // Setup the initial REPL environment
 Env *repl_env;
 
+WRAP_INTEGER_OP(plus,+)
+WRAP_INTEGER_OP(minus,-)
+WRAP_INTEGER_OP(multiply,*)
+WRAP_INTEGER_OP(divide,/)
+
 void init_repl_env() {
     repl_env = new_env(NULL, NULL, NULL);
-
-    WRAP_INTEGER_OP(plus,+)
-    WRAP_INTEGER_OP(minus,-)
-    WRAP_INTEGER_OP(multiply,*)
-    WRAP_INTEGER_OP(divide,/)
 
     env_set(repl_env, malval_new_symbol("+"), (MalVal *)int_plus);
     env_set(repl_env, malval_new_symbol("-"), (MalVal *)int_minus);
@@ -154,6 +156,8 @@ int main()
     MalVal *exp;
     char *output;
     char prompt[100];
+
+    MAL_GC_SETUP();
 
     // Set the initial prompt and environment
     snprintf(prompt, sizeof(prompt), "user> ");
@@ -168,8 +172,8 @@ int main()
         output = PRINT(exp);
 
         if (output) { 
-            g_print("%s\n", output);
-            free(output);        // Free output string
+            puts(output);
+            MAL_GC_FREE(output);        // Free output string
         }
 
         //malval_free(exp);    // Free evaluated expression

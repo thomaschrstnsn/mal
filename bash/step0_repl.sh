@@ -1,12 +1,11 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 READ () {
     read -u 0 -e -p "user> " r
 }
 
 EVAL () {
-    r=
-    eval "${1}"
+    r="${1}"
 }
 
 PRINT () {
