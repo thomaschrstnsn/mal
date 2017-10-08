@@ -1,3 +1,5 @@
+{-# LANGUAGE FlexibleContexts #-}
+
 module Reader
   ( readStr
   ) where
@@ -7,7 +9,6 @@ import Types
 
 type MalParser a = GenParser Char () a
 
---ast :: GenParser Char st Ast
 ast :: MalParser Ast
 ast = do
   result <- expression
@@ -15,10 +16,12 @@ ast = do
   return result
 
 expression :: MalParser Ast
-expression = spaces *> choice [aSym, aList, aInt] <* spaces <?> "expression"
+expression =
+  whitespaces *> choice [aComment, aNil, aBool, aSym, aList, aInt, aKw, aString] <*
+  (whitespaces *> skipMany aComment) <?> "expression"
 
 expressions :: MalParser [Ast]
-expressions = sepBy expression spaces
+expressions = sepBy expression whitespaces
 
 aInt :: MalParser Ast
 aInt = (AInt . read) <$> many1 digit
@@ -26,19 +29,50 @@ aInt = (AInt . read) <$> many1 digit
 aSym :: MalParser Ast
 aSym = do
   first <- letter <|> oneOf "+_-*/"
-  rest <- many alphaNum
+  rest <- many (alphaNum <|> oneOf "-*")
   return $ ASym $ first : rest
 
 aList :: MalParser Ast
-aList = do
-  _ <- char '('
-  exprs <- expressions
-  _ <- char ')'
-  return $ AList exprs
+aList = AList <$> between (char '(') (char ')') expressions
+
+aKw :: MalParser Ast
+aKw = do
+  _ <- char ':'
+  keyword <- many1 alphaNum
+  return $ AKw keyword
+
+aNil :: MalParser Ast
+aNil = ANil <$ string "nil"
+
+aBool :: MalParser Ast
+aBool = ABool True <$ string "true" <|> ABool False <$ string "false"
+
+aString :: MalParser Ast
+aString = AStr <$> between (char '\"') (char '\"') (many strchar)
+  where
+    strchar = char '\\' *> escape <|> satisfy (`notElem` "\"\\")
+
+aComment :: MalParser Ast
+aComment =
+  do _ <- char ';'
+     _ <- manyTill anyChar (try newline)
+     return AComment
+     <?> "comment"
+
+escape :: MalParser Char
+escape = choice (zipWith decode "bnfrt\\\"/" "\b\n\f\r\t\\\"/")
+  where
+    decode c r = r <$ char c
+
+whitespace :: MalParser Char
+whitespace = choice [space, char ','] <?> "whitespace"
+
+whitespaces :: MalParser ()
+whitespaces = skipMany whitespace
 
 readStr :: String -> Either String Ast
 readStr x = do
-  let res = parse ast "(mal stdin)" x
+  let res = parse ast "(mal stdin)" (x ++ "\n")
   case res of
     (Left err) -> Left $ show err
     (Right r) -> Right r
