@@ -4,6 +4,7 @@ module Reader
   ( readStr
   ) where
 
+import qualified Data.Map.Strict as Map
 import Text.ParserCombinators.Parsec
 import Types
 
@@ -17,7 +18,8 @@ ast = do
 
 expression :: MalParser Ast
 expression =
-  whitespaces *> choice [aComment, aNil, aBool, aSym, aList, aInt, aKw, aString] <*
+  whitespaces *>
+  choice [aComment, aNil, aBool, aSym, aList, aVector, aMap, aInt, aKw, aString] <*
   (whitespaces *> skipMany aComment) <?> "expression"
 
 expressions :: MalParser [Ast]
@@ -34,6 +36,20 @@ aSym = do
 
 aList :: MalParser Ast
 aList = AList <$> between (char '(') (char ')') expressions
+
+aVector :: MalParser Ast
+aVector = AVector <$> between (char '[') (char ']') expressions
+
+pairs :: [a] -> [(a, a)]
+pairs xs = pairs' xs []
+  where
+    pairs' [] res = reverse res
+    pairs' [_] res = reverse res
+    pairs' (x:y:xs') res = pairs' xs' ((x, y) : res)
+
+aMap :: MalParser Ast
+aMap =
+  (AMap . Map.fromList . pairs) <$> between (char '{') (char '}') expressions
 
 aKw :: MalParser Ast
 aKw = do

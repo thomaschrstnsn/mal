@@ -2,8 +2,12 @@ module Types
   ( Ast(..)
   ) where
 
+import qualified Data.Map.Strict as Map
+
 data Ast
   = AList [Ast]
+  | AVector [Ast]
+  | AMap (Map.Map Ast Ast)
   | ASym String
   | AInt Integer
   | AKw String
@@ -11,4 +15,4 @@ data Ast
   | ABool Bool
   | AStr String
   | AComment
-  deriving (Show, Eq)
+  deriving (Show, Eq, Ord)

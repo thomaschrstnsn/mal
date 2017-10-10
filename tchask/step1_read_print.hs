@@ -4,6 +4,7 @@
   --resolver lts-9.0
   --package parsec
   --package haskeline
+  --package containers
 -}
 import Control.Monad.IO.Class
 import Printer
