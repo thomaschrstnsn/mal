@@ -1,18 +1,23 @@
 module Readline
-  ( Repl
-  , repl
+  ( repl
+  , InputT
   ) where
 
-import Control.Monad.IO.Class
-import System.Console.Repline
+import System.Console.Haskeline
 
-type Repl a = HaskelineT IO a
+ini :: IO ()
+ini = putStrLn "Welcome!"
 
-ini :: Repl ()
-ini = liftIO $ putStrLn "Welcome!"
-
-completer :: Monad m => WordCompleter m
-completer _ = return []
-
-repl :: (String -> Repl ()) -> IO ()
-repl rep = evalRepl "user> " rep [] (Word completer) ini
+repl :: (String -> InputT IO ()) -> IO ()
+repl rep = do
+  ini
+  runInputT defaultSettings loop
+  where
+    loop :: InputT IO ()
+    loop = do
+      minput <- getInputLine "user> "
+      case minput of
+        Nothing -> return ()
+        Just input -> do
+          rep input
+          loop

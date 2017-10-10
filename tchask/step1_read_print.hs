@@ -2,8 +2,8 @@
 {- stack
   script
   --resolver lts-9.0
-  --package repline
   --package parsec
+  --package haskeline
 -}
 import Control.Monad.IO.Class
 import Printer
@@ -13,7 +13,7 @@ import Readline
 malEval :: a -> a
 malEval = id
 
-malRep :: String -> Repl ()
+malRep :: String -> InputT IO ()
 malRep input = do
   let ast' = readStr input
   liftIO $

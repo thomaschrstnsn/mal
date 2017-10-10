@@ -2,7 +2,7 @@
 {- stack
   script
   --resolver lts-9.0
-  --package repline
+  --package haskeline
 -}
 import Control.Monad.IO.Class
 import Readline
@@ -13,7 +13,7 @@ malEval = id
 
 malPrint = putStrLn
 
-malRep :: String -> Repl ()
+malRep :: String -> InputT IO ()
 malRep input = liftIO $ (malPrint . malEval . malRead) input
 
 main :: IO ()
