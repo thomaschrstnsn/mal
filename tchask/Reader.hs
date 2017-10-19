@@ -19,14 +19,43 @@ ast = do
 expression :: MalParser Ast
 expression =
   whitespaces *>
-  choice [aComment, aNil, aBool, aSym, aList, aVector, aMap, aInt, aKw, aString] <*
+  choice
+    [aComment, aNil, aBool, try aInt, aSym, aList, aVector, aMap, aKw, aString] <*
   (whitespaces *> skipMany aComment) <?> "expression"
 
 expressions :: MalParser [Ast]
 expressions = sepBy expression whitespaces
 
+astAsKey :: Ast -> Key
+astAsKey (AKw kw) = KKw kw
+astAsKey (ABool b) = KBool b
+astAsKey (AInt i) = KInt i
+astAsKey (AStr s) = KStr s
+astAsKey _ = error "Ast to key translation for unknown"
+
+key :: MalParser Key
+key =
+  whitespaces *> (astAsKey <$> choice [aBool, aInt, aKw, aString]) <*
+  (whitespaces *> skipMany aComment) <?> "key"
+
+keyValuePairs :: MalParser [(Key, Ast)]
+keyValuePairs = sepBy keyValuePair whitespaces
+
+keyValuePair :: MalParser (Key, Ast)
+keyValuePair = (,) <$> key <*> expression
+
+readNeg :: String -> Integer
+readNeg ('-':ds) = negate $ read ds
+readNeg x = read x
+
 aInt :: MalParser Ast
-aInt = (AInt . read) <$> many1 digit
+aInt = AInt . readNeg <$> (many1 digit <|> negNumber)
+
+negNumber :: MalParser String
+negNumber = do
+  first <- char '-'
+  rest <- many1 digit
+  return $ first : rest
 
 aSym :: MalParser Ast
 aSym = do
@@ -40,16 +69,8 @@ aList = AList <$> between (char '(') (char ')') expressions
 aVector :: MalParser Ast
 aVector = AVector <$> between (char '[') (char ']') expressions
 
-pairs :: [a] -> [(a, a)]
-pairs xs = pairs' xs []
-  where
-    pairs' [] res = reverse res
-    pairs' [_] res = reverse res
-    pairs' (x:y:xs') res = pairs' xs' ((x, y) : res)
-
 aMap :: MalParser Ast
-aMap =
-  (AMap . Map.fromList . pairs) <$> between (char '{') (char '}') expressions
+aMap = (AMap . Map.fromList) <$> between (char '{') (char '}') keyValuePairs
 
 aKw :: MalParser Ast
 aKw = do
