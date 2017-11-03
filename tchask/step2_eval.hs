@@ -5,6 +5,7 @@
   --package parsec
   --package haskeline
   --package containers
+  --package mtl
 -}
 import Control.Monad.IO.Class
 import Evaluator
@@ -29,4 +30,4 @@ malRep input = do
       (Left parseError) -> "Parse error on: '" ++ input ++ "': " ++ parseError
 
 main :: IO ()
-main = repl malRep
+main = repl malRep ()

@@ -60,7 +60,7 @@ negNumber = do
 aSym :: MalParser Ast
 aSym = do
   first <- letter <|> oneOf "+_-*/"
-  rest <- many (alphaNum <|> oneOf "-*")
+  rest <- many (alphaNum <|> oneOf "-*!")
   return $ ASym $ first : rest
 
 aList :: MalParser Ast
@@ -93,7 +93,7 @@ aComment :: MalParser Ast
 aComment =
   do _ <- char ';'
      _ <- manyTill anyChar (try newline)
-     return AComment
+     return AVoid
      <?> "comment"
 
 escape :: MalParser Char

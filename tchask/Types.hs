@@ -1,13 +1,19 @@
+{-# LANGUAGE FlexibleContexts #-}
+
 module Types
   ( Ast(..)
   , Key(..)
   , Function
-  , Environment
   , Error(..)
   , Err
   , EvalAst
+  , Environment(..)
+  , EvalM(..)
+  , ErrM
   ) where
 
+import Control.Monad.Except
+import Control.Monad.State.Strict
 import qualified Data.Map.Strict as Map
 
 data Key
@@ -28,21 +34,34 @@ data Ast
   | ABool Bool
   | AStr String
   | AFun Function
-  | AComment
+  | AVoid
 
-type Function = [Ast] -> Either Error Ast
-
-type Environment = Map.Map String Function
+type Function = [Ast] -> Err Ast
 
 data Error
   = UnexpectedType Ast
                    String
   | SymbolNotFound String
-  | ExpectedFunctionAtHead Ast
-  | ApplyWhenNoList Ast
+  | UnexpectedElementAtHead Ast
   | DivisionByZero
+  | ExpectedSymbolButFound Ast
+  | UnexpectedNumberOfElementInForm { expected :: Integer
+                                    , actual :: Ast }
   | AggregateError [Error]
 
 type Err a = Either Error a
 
 type EvalAst = Err Ast
+
+data Environment = Env
+  { outer :: Maybe Environment
+  , envData :: Map.Map String Ast
+  }
+
+class (Monad m, MonadError Error m) =>
+      ErrM m
+
+class (Monad m, ErrM m, MonadState Environment m) =>
+      EvalM m where
+  getEnv :: String -> m Ast
+  setEnv :: String -> Ast -> m ()

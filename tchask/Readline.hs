@@ -3,17 +3,17 @@ module Readline
   , InputT
   ) where
 
+import Control.Monad.State.Strict
 import System.Console.Haskeline
 
 ini :: IO ()
 ini = putStrLn "Welcome!"
 
-repl :: (String -> InputT IO ()) -> IO ()
-repl rep = do
+repl :: (String -> InputT (StateT a IO) ()) -> a -> IO ()
+repl rep s = do
   ini
-  runInputT defaultSettings loop
+  evalStateT (runInputT defaultSettings loop) s
   where
-    loop :: InputT IO ()
     loop = do
       minput <- getInputLine "user> "
       case minput of

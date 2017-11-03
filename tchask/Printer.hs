@@ -1,3 +1,5 @@
+{-# LANGUAGE NamedFieldPuns #-}
+
 module Printer
   ( prStr
   , prErr
@@ -34,8 +36,8 @@ prStr ast =
     ABool True -> "true"
     ABool False -> "false"
     AStr s -> show s
-    AComment -> ""
-    AFun _ -> ":function123"
+    AVoid -> ""
+    AFun _ -> "#function"
 
 prErr :: Error -> String
 prErr err =
@@ -47,8 +49,12 @@ prErr err =
     UnexpectedType ast t ->
       "Unexpected type: found '" ++ prStr ast ++ "'  but expected: " ++ t
     SymbolNotFound sym -> "Could not find symbol: '" ++ sym ++ "'"
-    ExpectedFunctionAtHead ast ->
-      "Expected function at head of list, but found: '" ++ prStr ast ++ "'"
-    ApplyWhenNoList ast ->
-      "Apply called on something not a list: '" ++ prStr ast ++ "'"
+    UnexpectedElementAtHead ast ->
+      "Expected function or special form at head of list, but found: '" ++
+      prStr ast ++ "'"
+    ExpectedSymbolButFound ast ->
+      "Expected symbol but found: '" ++ prStr ast ++ "'"
+    UnexpectedNumberOfElementInForm {expected, actual} ->
+      "Unexpected number of elements in form, expected: " ++
+      show expected ++ ", but found: '" ++ prStr actual ++ "'"
     DivisionByZero -> "Division by zero attempt"
