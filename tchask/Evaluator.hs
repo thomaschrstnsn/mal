@@ -121,10 +121,28 @@ do' asts =
       ress <- mapM eval asts
       return $ last ress
 
+if' :: EvalM m => [Ast] -> m Ast
+if' asts =
+  case asts of
+    [predicate, trueExpr] -> ifImpl predicate trueExpr ANil
+    [predicate, trueExpr, falseExpr] -> ifImpl predicate trueExpr falseExpr
+    _ ->
+      throwError
+        UnexpectedNumberOfElementInForm
+        {expected = 2, actual = AList asts, form = "if"}
+  where
+    ifImpl predicate trueExpr falseExpr = do
+      evaled <- eval predicate
+      case evaled of
+        ANil -> eval falseExpr
+        ABool False -> eval falseExpr
+        _ -> eval trueExpr
+
 apply :: EvalM m => [Ast] -> m Ast
 apply (ASym "def!":xs) = def xs
 apply (ASym "let*":xs) = let' xs
 apply (ASym "do":xs) = do' xs
+apply (ASym "if":xs) = if' xs
 apply asts = do
   evaled <- evalAst (AList asts)
   case evaled of
