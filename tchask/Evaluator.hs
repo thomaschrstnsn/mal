@@ -4,11 +4,9 @@ module Evaluator where
 
 import Control.Arrow (second)
 import Control.Monad.Except
-import Control.Monad.State.Strict
 import Data.Either
 import qualified Data.Map.Strict as Map
 
-import qualified Environment as Env
 import Types
 
 asInt :: Ast -> Err Integer
@@ -90,11 +88,8 @@ let' :: EvalM m => [Ast] -> m Ast
 let' [bindingExpr, expr] = do
   bindings <- getBindings
   innerEnv <- newEnv
-  boundEnv <- buildEnv innerEnv bindings
-  orig <- get
-  put boundEnv
-  res <- eval expr
-  put orig
+  (boundEnv, _) <- withEnv innerEnv (buildEnv bindings)
+  (_, res) <- withEnv boundEnv (eval expr)
   return res
   where
     getBindings :: MonadError Error m => m [Ast]
@@ -103,13 +98,14 @@ let' [bindingExpr, expr] = do
         AList bindings -> return bindings
         AVector bindings -> return bindings
         x -> throwError $ UnexpectedType x "list or vector in let* binding"
-    buildEnv :: EvalM m => Environment -> [Ast] -> m Environment
-    buildEnv env (ASym sym:val:rest) = do
+    buildEnv :: EvalM m => [Ast] -> m ()
+    buildEnv (ASym sym:val:rest) = do
       evaled <- eval val
-      buildEnv (Env.setEnv sym evaled env) rest
-    buildEnv _ (notSym:_:_) = throwError $ ExpectedSymbolButFound notSym
-    buildEnv env [] = return env
-    buildEnv _ [_] = throwError UnevenNumberOfElementsInLetBinding
+      setEnv sym evaled
+      buildEnv rest
+    buildEnv (notSym:_:_) = throwError $ ExpectedSymbolButFound notSym
+    buildEnv [] = return ()
+    buildEnv [_] = throwError UnevenNumberOfElementsInLetBinding
 let' asts =
   throwError
     UnexpectedNumberOfElementInForm

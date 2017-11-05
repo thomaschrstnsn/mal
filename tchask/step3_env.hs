@@ -40,6 +40,13 @@ instance EvalM AppM where
   newEnv = do
     env <- get
     return $ Env.newEnv env
+  withEnv env expr = do
+    orig <- get
+    put env
+    res <- expr
+    next <- get
+    put orig
+    return (next, res)
 
 instance (MonadError Error AppM) => ErrM AppM
 

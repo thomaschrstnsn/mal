@@ -13,7 +13,6 @@ module Types
   ) where
 
 import Control.Monad.Except
-import Control.Monad.State.Strict
 import qualified Data.Map.Strict as Map
 
 data Key
@@ -63,8 +62,9 @@ data Environment = Env
 class (Monad m, MonadError Error m) =>
       ErrM m
 
-class (Monad m, ErrM m, MonadState Environment m) =>
+class (Monad m, ErrM m) =>
       EvalM m where
   getEnv :: String -> m Ast
   setEnv :: String -> Ast -> m ()
   newEnv :: m Environment
+  withEnv :: Environment -> m a -> m (Environment, a)
