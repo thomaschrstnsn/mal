@@ -37,6 +37,9 @@ instance EvalM AppM where
   setEnv s a = do
     env <- get
     put $ Env.setEnv s a env
+  newEnv = do
+    env <- get
+    return $ Env.newEnv env
 
 instance (MonadError Error AppM) => ErrM AppM
 

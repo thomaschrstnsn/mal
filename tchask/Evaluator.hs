@@ -1,38 +1,41 @@
+{-# LANGUAGE FlexibleContexts #-}
+
 module Evaluator where
 
 import Control.Arrow (second)
 import Control.Monad.Except
+import Control.Monad.State.Strict
 import Data.Either
 import qualified Data.Map.Strict as Map
 
--- import Environment as Env
+import qualified Environment as Env
 import Types
 
 asInt :: Ast -> Err Integer
 asInt (AInt x) = return x
 asInt a = throwError $ UnexpectedType a "integer"
 
-extract :: ErrM m => (Ast -> Err a) -> [Ast] -> m [a]
+extract :: (Ast -> Err a) -> [Ast] -> Err [a]
 extract f xs = do
   let as = fmap f xs
   let errors = lefts as
   case errors of
-    [] -> return $ rights as
-    [e] -> throwError e
-    _ -> throwError $ AggregateError errors
+    [] -> Right $ rights as
+    [e] -> Left e
+    _ -> Left $ AggregateError errors
 
-extractMap :: ErrM m => (Ast -> m a) -> Map.Map Key Ast -> m (Map.Map Key a)
-extractMap f m = do
+extractMapM :: ErrM m => (Ast -> m a) -> Map.Map Key Ast -> m (Map.Map Key a)
+extractMapM f m = do
   let tuples = Map.toList m
   values <- mapM f $ fmap snd tuples
   return $ Map.fromList $ zip (fmap fst tuples) values
 
-plus :: ErrM m => [Ast] -> m Ast
+plus :: [Ast] -> EvalAst
 plus xs = do
   ints <- extract asInt xs
   return $ AInt $ sum ints
 
-minus :: ErrM m => [Ast] -> m Ast
+minus :: [Ast] -> EvalAst
 minus xs = do
   ints <- extract asInt xs
   let result =
@@ -41,12 +44,12 @@ minus xs = do
           i:is -> i - sum is
   return $ AInt result
 
-multiply :: ErrM m => [Ast] -> m Ast
+multiply :: [Ast] -> EvalAst
 multiply xs = do
   ints <- extract asInt xs
   return $ AInt $ product ints
 
-divide :: ErrM m => [Ast] -> m Ast
+divide :: [Ast] -> EvalAst
 divide xs = do
   ints <- extract asInt xs
   _ <- when (0 `elem` ints) $ throwError DivisionByZero
@@ -57,7 +60,7 @@ replEnv =
   Env
   {outer = Nothing, envData = Map.fromList $ fmap (second AFun) builtInFuncs}
   where
-    builtInFuncs = [] -- [("+", plus), ("-", minus), ("*", multiply), ("/", divide)]
+    builtInFuncs = [("+", plus), ("-", minus), ("*", multiply), ("/", divide)]
 
 evalAst :: EvalM m => Ast -> m Ast
 evalAst (ASym sym) = getEnv sym
@@ -67,21 +70,54 @@ evalAst (AList asts) = do
 evalAst (AVector asts) = do
   xs <- mapM eval asts
   return $ AVector xs
-evalAst (AMap m) = AMap <$> extractMap eval m
+evalAst (AMap m) = AMap <$> extractMapM eval m
 evalAst x = return x
 
 def :: EvalM m => [Ast] -> m Ast
 def [sym, val] =
   case sym of
     ASym sym' -> do
-      _ <- setEnv sym' val
-      return AVoid
+      evaled <- eval val
+      _ <- setEnv sym' evaled
+      return evaled
     _ -> throwError $ ExpectedSymbolButFound sym
 def asts =
-  throwError UnexpectedNumberOfElementInForm {expected = 3, actual = AList asts}
+  throwError
+    UnexpectedNumberOfElementInForm
+    {expected = 3, actual = AList asts, form = "def!"}
+
+let' :: EvalM m => [Ast] -> m Ast
+let' [bindingExpr, expr] = do
+  bindings <- getBindings
+  innerEnv <- newEnv
+  boundEnv <- buildEnv innerEnv bindings
+  orig <- get
+  put boundEnv
+  res <- eval expr
+  put orig
+  return res
+  where
+    getBindings :: MonadError Error m => m [Ast]
+    getBindings =
+      case bindingExpr of
+        AList bindings -> return bindings
+        AVector bindings -> return bindings
+        x -> throwError $ UnexpectedType x "list or vector in let* binding"
+    buildEnv :: EvalM m => Environment -> [Ast] -> m Environment
+    buildEnv env (ASym sym:val:rest) = do
+      evaled <- eval val
+      buildEnv (Env.setEnv sym evaled env) rest
+    buildEnv _ (notSym:_:_) = throwError $ ExpectedSymbolButFound notSym
+    buildEnv env [] = return env
+    buildEnv _ [_] = throwError UnevenNumberOfElementsInLetBinding
+let' asts =
+  throwError
+    UnexpectedNumberOfElementInForm
+    {expected = 3, actual = AList asts, form = "let*"}
 
 apply :: EvalM m => [Ast] -> m Ast
 apply (ASym "def!":xs) = def xs
+apply (ASym "let*":xs) = let' xs
 apply asts = do
   evaled <- evalAst (AList asts)
   case evaled of

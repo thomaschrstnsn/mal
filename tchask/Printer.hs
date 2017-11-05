@@ -54,7 +54,11 @@ prErr err =
       prStr ast ++ "'"
     ExpectedSymbolButFound ast ->
       "Expected symbol but found: '" ++ prStr ast ++ "'"
-    UnexpectedNumberOfElementInForm {expected, actual} ->
-      "Unexpected number of elements in form, expected: " ++
+    UnexpectedNumberOfElementInForm {expected, actual, form} ->
+      "Unexpected number of elements in form: '" ++
+      form ++
+      "', expected: " ++
       show expected ++ ", but found: '" ++ prStr actual ++ "'"
+    UnevenNumberOfElementsInLetBinding ->
+      "Uneven number of bindings in let* expression's bindings"
     DivisionByZero -> "Division by zero attempt"

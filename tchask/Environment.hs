@@ -1,6 +1,7 @@
 module Environment
   ( setEnv
   , findEnv
+  , newEnv
   ) where
 
 import Control.Monad.Except
@@ -18,3 +19,6 @@ findEnv key env =
       case outer env of
         Just outerEnv -> findEnv key outerEnv
         Nothing -> throwError $ SymbolNotFound key
+
+newEnv :: Environment -> Environment
+newEnv env = Env {envData = Map.empty, outer = Just env}

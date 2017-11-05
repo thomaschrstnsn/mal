@@ -36,7 +36,7 @@ data Ast
   | AFun Function
   | AVoid
 
-type Function = [Ast] -> Err Ast
+type Function = [Ast] -> EvalAst
 
 data Error
   = UnexpectedType Ast
@@ -46,7 +46,9 @@ data Error
   | DivisionByZero
   | ExpectedSymbolButFound Ast
   | UnexpectedNumberOfElementInForm { expected :: Integer
-                                    , actual :: Ast }
+                                    , actual :: Ast
+                                    , form :: String }
+  | UnevenNumberOfElementsInLetBinding
   | AggregateError [Error]
 
 type Err a = Either Error a
@@ -65,3 +67,4 @@ class (Monad m, ErrM m, MonadState Environment m) =>
       EvalM m where
   getEnv :: String -> m Ast
   setEnv :: String -> Ast -> m ()
+  newEnv :: m Environment
