@@ -111,9 +111,20 @@ let' asts =
     UnexpectedNumberOfElementInForm
     {expected = 3, actual = AList asts, form = "let*"}
 
+do' :: EvalM m => [Ast] -> m Ast
+do' asts =
+  if null asts
+    then throwError
+           UnexpectedNumberOfElementInForm
+           {expected = 2, actual = AList [], form = "do"}
+    else do
+      ress <- mapM eval asts
+      return $ last ress
+
 apply :: EvalM m => [Ast] -> m Ast
 apply (ASym "def!":xs) = def xs
 apply (ASym "let*":xs) = let' xs
+apply (ASym "do":xs) = do' xs
 apply asts = do
   evaled <- evalAst (AList asts)
   case evaled of
