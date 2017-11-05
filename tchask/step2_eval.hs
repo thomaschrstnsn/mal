@@ -7,26 +7,26 @@
   --package containers
   --package mtl
 -}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE UndecidableInstances #-}
+
+import App (run)
 import Control.Monad.IO.Class
 import Evaluator
 import Printer
 import Reader
 import Readline
-import Types
 
-malEval :: Ast -> EvalAst
-malEval a = eval a replEnv
-
-malRep :: String -> InputT IO ()
+malRep :: Repl ()
 malRep input = do
   let ast' = readStr input
   liftIO $
     putStrLn $
     case ast' of
       (Right ast) ->
-        case malEval ast of
-          Left err -> prErr err
-          Right evaledAst -> prStr evaledAst
+        case run (eval ast) replEnv of
+          (Left err, _) -> prErr err
+          (Right evaledAst, _) -> prStr evaledAst
       (Left parseError) -> "Parse error on: '" ++ input ++ "': " ++ parseError
 
 main :: IO ()

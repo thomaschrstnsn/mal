@@ -5,6 +5,7 @@
   --package parsec
   --package haskeline
   --package containers
+  --package mtl
 -}
 import Control.Monad.IO.Class
 import Printer
@@ -14,7 +15,7 @@ import Readline
 malEval :: a -> a
 malEval = id
 
-malRep :: String -> InputT IO ()
+malRep :: Repl ()
 malRep input = do
   let ast' = readStr input
   liftIO $
@@ -24,4 +25,4 @@ malRep input = do
       (Left parseError) -> "Parse error on: '" ++ input ++ "': " ++ parseError
 
 main :: IO ()
-main = repl malRep
+main = repl malRep ()

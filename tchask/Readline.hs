@@ -1,6 +1,7 @@
 module Readline
   ( repl
   , InputT
+  , Repl
   ) where
 
 import Control.Monad.State.Strict
@@ -9,7 +10,9 @@ import System.Console.Haskeline
 ini :: IO ()
 ini = putStrLn "Welcome!"
 
-repl :: (String -> InputT (StateT a IO) ()) -> a -> IO ()
+type Repl a = (String -> InputT (StateT a IO) ())
+
+repl :: Repl a -> a -> IO ()
 repl rep s = do
   ini
   evalStateT (runInputT defaultSettings loop) s
