@@ -20,7 +20,17 @@ expression :: MalParser Ast
 expression =
   whitespaces *>
   choice
-    [aComment, aNil, aBool, try aInt, aSym, aList, aVector, aMap, aKw, aString] <*
+    [ aComment
+    , try aNil
+    , try aBool
+    , try aInt
+    , aSym
+    , aList
+    , aVector
+    , aMap
+    , aKw
+    , aString
+    ] <*
   (whitespaces *> skipMany aComment) <?> "expression"
 
 expressions :: MalParser [Ast]

@@ -3,7 +3,8 @@
 module Types
   ( Ast(..)
   , Key(..)
-  , Function
+  , Function(..)
+  , NativeFunction
   , Error(..)
   , Err
   , EvalAst
@@ -32,10 +33,15 @@ data Ast
   | ANil
   | ABool Bool
   | AStr String
+  | ANativeFun NativeFunction
   | AFun Function
   | AVoid
 
-type Function = [Ast] -> EvalAst
+type NativeFunction = [Ast] -> EvalAst
+
+data Function =
+  Function Environment
+           NativeFunction
 
 data Error
   = UnexpectedType Ast
@@ -44,10 +50,13 @@ data Error
   | UnexpectedElementAtHead Ast
   | DivisionByZero
   | ExpectedSymbolButFound Ast
-  | UnexpectedNumberOfElementInForm { expected :: Integer
-                                    , actual :: Ast
-                                    , form :: String }
+  | UnexpectedNumberOfElementInForm { unoeifExpected :: Integer
+                                    , unoeifActual :: Ast
+                                    , unoeifForm :: String }
   | UnevenNumberOfElementsInLetBinding
+  | ArgumentCountMismatch { acmExpected :: Integer
+                          , acmActualCount :: Integer
+                          , acmArguments :: [Ast] }
   | AggregateError [Error]
 
 type Err a = Either Error a

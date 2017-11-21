@@ -37,6 +37,7 @@ prStr ast =
     ABool False -> "false"
     AStr s -> show s
     AVoid -> ""
+    ANativeFun _ -> "#nativefunction"
     AFun _ -> "#function"
 
 prErr :: Error -> String
@@ -54,11 +55,16 @@ prErr err =
       prStr ast ++ "'"
     ExpectedSymbolButFound ast ->
       "Expected symbol but found: '" ++ prStr ast ++ "'"
-    UnexpectedNumberOfElementInForm {expected, actual, form} ->
+    UnexpectedNumberOfElementInForm {unoeifExpected, unoeifActual, unoeifForm} ->
       "Unexpected number of elements in form: '" ++
-      form ++
+      unoeifForm ++
       "', expected: " ++
-      show expected ++ ", but found: '" ++ prStr actual ++ "'"
+      show unoeifExpected ++ ", but found: '" ++ prStr unoeifActual ++ "'"
     UnevenNumberOfElementsInLetBinding ->
       "Uneven number of bindings in let* expression's bindings"
     DivisionByZero -> "Division by zero attempt"
+    ArgumentCountMismatch {acmExpected, acmActualCount, acmArguments} ->
+      "Number of arguments supplied (" ++
+      show acmExpected ++
+      ") does not match provided number: " ++
+      show acmActualCount ++ " in '" ++ prStr (AList acmArguments) ++ "'"
